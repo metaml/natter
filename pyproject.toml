@@ -1,0 +1,20 @@
+[tool.poetry]
+  name = "natter"
+  version = "0.1.0"
+  description = "natter"
+  authors = ["metaml <metaml@gmail.com>"]
+  packages = [
+   {include="natter", from="src"}
+  ]
+  
+[tool.poetry.dependencies]
+  python = "^3.12"
+  openai = "^1.35.9"
+  gradio = "^4.37.2"
+
+[build-system]
+  requires = ["poetry-core"]
+  build-backend = "poetry.core.masonry.api"
+
+[tool.semantic_release]
+  branch = "main"
