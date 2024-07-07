@@ -10,8 +10,8 @@
     utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        python = pkgs.python311;
-        python-pkgs = pkgs.python311Packages;
+        python = pkgs.python312;
+        python-pkgs = pkgs.python312Packages;
       in {
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
@@ -19,8 +19,6 @@
             gnumake
             python
             python-pkgs.flake8
-            # python-pkgs.gradio
-            # python-pkgs.openai
             python-pkgs.mypy
             python-pkgs.pytest
             python-pkgs.pytest-cov                        
@@ -34,6 +32,8 @@
             export PATH="$PIP_PREFIX/bin:$PATH"
             unset SOURCE_DATE_EPOCH
             export PS1="natter|$PS1"
+            python -m venv ./venv
+            . ./venv/bin/activate
           '';
         };
         devShell = self.devShells.${system}.default;        
