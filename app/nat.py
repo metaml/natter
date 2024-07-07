@@ -20,16 +20,16 @@ if __name__ == "__main__":
     {"role": "system", "content": "You are a helpful and kind AI Assistant."},
   ]
 
-  inputs = g.Textbox(lines=7, label="chat with AIP")
+  inputs = g.Textbox(lines=7, label="Hal")
   outputs = g.Textbox(label="reply")
 
-  g.Interface(fn=chatbot,
-              inputs=inputs,
-              outputs=outputs,
-              title="AIP Natter",
-              description="Hello, Dave.",
-              theme="compact"
-             ).launch(share=True)
-
+  nat = g.Interface(fn=chatbot,
+                    inputs=inputs,
+                    outputs=outputs,
+                    title="AIP",
+                    description="Hello, Dave",
+                    theme="compact"
+                    ).launch(share=True)
+  nat.launch()
 
   
