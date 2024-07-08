@@ -2,12 +2,15 @@
 
 import api_key as ak
 import gradio as g
-import openai
+import openai 
+
+# global hack fix it later
+client = openai.OpenAI()
 
 def chatbot(input):
   if input:
     messages.append({"role": "user", "content": input})
-    chat = openai.ChatCompletion.create(
+    chat = client.chat.completions.create(
       model="gpt-3.5-turbo", messages=messages
     )
     reply = chat.choices[0].message.content
@@ -28,7 +31,7 @@ if __name__ == "__main__":
                     outputs=outputs,
                     title="AIP",
                     description="Hello, Dave",
-                    theme="compact"
+                    theme=g.themes.Default()
                     ).launch(share=True)
   nat.launch()
 
