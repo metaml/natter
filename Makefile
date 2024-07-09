@@ -1,5 +1,11 @@
-run: ## run natter, a chat bot
-	./app/nat.py
+run: ## run nat, rest server
+	uvicorn main:app
+
+run-dev: ## run nat, rest server in dev mode
+	uvicorn main:app --reload
+
+run-chat: ## run chat
+	./app/natdev.py
 
 clean: ## clean
 	find . -name \*~ | xargs rm -f
