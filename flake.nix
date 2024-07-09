@@ -1,3 +1,4 @@
+
 {
   description = "natter";
 
@@ -28,7 +29,7 @@
           shellHook = ''
             export LANG=en_US.UTF-8
             export PIP_PREFIX=$(pwd)/venv/pypy
-            export PYTHONPATH=./src:"$PIP_PREFIX/${python.sitePackages}:$PYTHONPATH"
+            export PYTHONPATH=$(pwd)/src:"$PIP_PREFIX/${python.sitePackages}:$PYTHONPATH"
             export PATH="$PIP_PREFIX/bin:$PATH"
             unset SOURCE_DATE_EPOCH
             export PS1="natter|$PS1"

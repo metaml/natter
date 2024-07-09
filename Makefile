@@ -1,11 +1,13 @@
+.DEFAULT_GOAL = help
+
 run: ## run nat, rest server
-	uvicorn main:app
+	uvicorn app.nat:app
 
 run-dev: ## run nat, rest server in dev mode
-	uvicorn main:app --reload
+	uvicorn app.nat:app --reload
 
 run-chat: ## run chat
-	./app/natdev.py
+	./app/chat.py
 
 clean: ## clean
 	find . -name \*~ | xargs rm -f
@@ -21,4 +23,3 @@ help: ## help
 	| sed 's/^Makefile://1' \
 	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
-.PHONY: poetry.lock
