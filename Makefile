@@ -12,7 +12,7 @@ run-chat: ## run chat
 clean: ## clean
 	find . -name \*~ | xargs rm -f
 
-update: ## update/install pypi packages
+update: ## install/update python packages
 	pip install -r requirements.txt
 
 dev: ## nix develop
