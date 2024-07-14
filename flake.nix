@@ -19,11 +19,11 @@
             gnumake
             python
             python-pkgs.flake8
-            python-pkgs.mypy
-            python-pkgs.pytest
-            python-pkgs.pytest-cov                        
-            python-pkgs.pip
             python-pkgs.isort
+            python-pkgs.mypy
+            python-pkgs.pip
+            python-pkgs.pytest
+            python-pkgs.pytest-cov
           ];
           shellHook = ''
             export LANG=en_US.UTF-8
