@@ -1,13 +1,10 @@
 .DEFAULT_GOAL = help
 
 run: ## run nat, rest server
-	uvicorn app.nat:app
+	uvicorn app.chat:chat
 
 run-dev: ## run nat, rest server in dev mode
-	uvicorn app.nat:app --reload
-
-run-chat: ## run chat
-	./app/chat.py
+	uvicorn app.app:chat --reload
 
 clean: ## clean
 	find . -name \*~ | xargs rm -f
