@@ -6,6 +6,12 @@ run: ## run nat, rest server
 run-dev: ## run nat, rest server in dev mode
 	uvicorn app.app:chat --reload
 
+build: ## build python package
+	nix build
+
+image: ## docker image
+	nix build --impure --verbose --option sandbox relaxed .#docker
+
 clean: ## clean
 	find . -name \*~ | xargs rm -f
 
