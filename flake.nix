@@ -1,5 +1,5 @@
 {
-  description = "natter";
+  description = "aip";
 
   inputs = {
     nixpkgs     = { url = "nixpkgs/nixpkgs-unstable"; };
@@ -9,14 +9,14 @@
   outputs = { self, nixpkgs, utils }:
     utils.lib.eachDefaultSystem (system:
       let
-        pname = "natter";
+        pname = "aip";
         pkgs = nixpkgs.legacyPackages.${system};
         python = pkgs.python312;
         python-pkgs = pkgs.python312Packages;
         version = "0.1.0";
       in {
         packages = rec {
-          natter = pkgs.stdenv.mkDerivation rec {
+          aip = pkgs.stdenv.mkDerivation rec {
             name = "${pname}";
             src = self;
             version = "";
@@ -25,17 +25,17 @@
             installPhase = ''
               mkdir -p $out/bin
               cp -p ./app/chat.py $out/bin/chat.py
-              cp -p ./app/nat.py $out/bin/nat.py
+              cp -p ./app/aip.py $out/bin/aip.py
               chmod +x $out/bin/*.py
               pwd
             '';
           };
-          default = natter;
+          default = aip;
         };
 
         apps = rec {
-          natter = utils.lib.mkApp { drv = self.packages.${system}.natter; };
-          default = natter;
+          aip = utils.lib.mkApp { drv = self.packages.${system}.aip; };
+          default = aip;
         };
 
         defaultPackage = self.packages.${system}.default;
@@ -54,20 +54,20 @@
               python
               self.defaultPackage.${system}
             ];
-            pathsToLink = [ "/bin" ];
+            pathsToLink = [ "/bin" "/usr" ];
           };
 
           config = {
             WorkingDir = "/";
             Env = [
-              "AWS_LAMBDA_LOG_GROUP_NAME=/aws/lambda/natter"
-              "AWS_LAMBDA_LOG_STREAM_NAME=natter-log-events"
+              "AWS_LAMBDA_LOG_GROUP_NAME=/aws/aip"
+              "AWS_LAMBDA_LOG_STREAM_NAME=aip-log-events"
               "NIX_SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
               "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
               "SYSTEM_CERTIFICATE_PATH=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
             ];
-            EntryPoint = [ "/bin/nat.py" ];
-            CMD = [ "nat" ]; # name of lambda handler
+            EntryPoint = [ "/usr/bin/env unvicorn" ];
+            CMD = [ "app.aip:aip" ];
           };
         };
         
@@ -86,10 +86,10 @@
           shellHook = ''
             export LANG=en_US.UTF-8
             export PIP_PREFIX=$(pwd)/venv/pypy
-            export PYTHONPATH=$(pwd)/src:"$PIP_PREFIX/${python.sitePackages}:$PYTHONPATH"
+            export PYTHONPATH=$(pwd)/src:$(pwd)/app:"$PIP_PREFIX/${python.sitePackages}:$PYTHONPATH"
             export PATH="$PIP_PREFIX/bin:$PATH"
             unset SOURCE_DATE_EPOCH
-            export PS1="natter|$PS1"
+            export PS1="aip|$PS1"
             python -m venv ./venv
             . ./venv/bin/activate
           '';

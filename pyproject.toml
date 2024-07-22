@@ -1,5 +1,5 @@
 [project]
-name = "nattere" 
+name = "aip" 
 dynamic = ["dependencies"]
 license = { text = "BSD 3-Clause License" }
 version = "0.1"
