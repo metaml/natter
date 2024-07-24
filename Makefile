@@ -33,6 +33,10 @@ help: ## help
 	| sed 's/^Makefile://1' \
 	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
+
+aws-login: ## aws sso login/refresh aws token
+	awscliv2 sso login --profile AdministratorAccess-975050288432
+
 # useful utlities below
 
 venv: export PYTHONPATH = $(pwd)/src:$(pwd)/app:$PYTHONPATH

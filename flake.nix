@@ -73,15 +73,13 @@
         
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
-            awscli2
             cacert
             gnumake
-            python
+            #python
             python-pkgs.pip
           ];
           shellHook = ''
             export LANG=en_US.UTF-8
-            export AWS_PROFILE=AdministratorAccess-975050288432
             export PIP_PREFIX=$(pwd)/venv/pypy
             export PYTHONPATH=$(pwd)/src:$(pwd)/app:"$PIP_PREFIX/${python.sitePackages}:$PYTHONPATH"
             export PATH="$PIP_PREFIX/bin:$PATH"
