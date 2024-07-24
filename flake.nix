@@ -66,25 +66,22 @@
               "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
               "SYSTEM_CERTIFICATE_PATH=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
             ];
-            EntryPoint = [ "/usr/bin/env unvicorn" ];
-            CMD = [ "app.aip:aip" ];
+            EntryPoint = [ "/bin/bash" ];
+            #CMD = [ "app.aip:app" ];
           };
         };
         
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
+            awscli2
             cacert
             gnumake
             python
-            python-pkgs.flake8
-            python-pkgs.isort
-            python-pkgs.mypy
             python-pkgs.pip
-            python-pkgs.pytest
-            python-pkgs.pytest-cov
           ];
           shellHook = ''
             export LANG=en_US.UTF-8
+            export AWS_PROFILE=AdministratorAccess-975050288432
             export PIP_PREFIX=$(pwd)/venv/pypy
             export PYTHONPATH=$(pwd)/src:$(pwd)/app:"$PIP_PREFIX/${python.sitePackages}:$PYTHONPATH"
             export PATH="$PIP_PREFIX/bin:$PATH"
@@ -98,4 +95,3 @@
       }
     );
 }
-

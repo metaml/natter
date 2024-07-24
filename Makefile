@@ -3,10 +3,10 @@
 ACCOUNT_ID := 975050288432
 
 run: ## run aip, rest server
-	uvicorn app.aip:app
+	uvicorn aip:aip
 
 run-dev: ## run aip, rest server in dev mode
-	uvicorn app.aip:app --reload
+	uvicorn aip:aip --reload
 
 build: ## build python package
 	nix build
@@ -35,6 +35,12 @@ help: ## help
 
 # useful utlities below
 
+venv: export PYTHONPATH = $(pwd)/src:$(pwd)/app:$PYTHONPATH
+venv: update
+venv: ## activate venv for non-nix env.
+	python -m venv ./venv
+	. ./venv/bin/activate
+
 image-push: REGION = us-east-2
 image-push: DOCKER_LOGIN = $(shell aws ecr get-login-password --region $(REGION))
 image-push: image-load ## push image to ecr
@@ -51,3 +57,10 @@ image-run: image-load ## run the image
 
 image-clean: ## remove images
 	docker system prune -a --volumes
+
+#
+# $ tar cvf aip.tar --exclude='.git/*' --exclude='venv' aip
+# $ scp aip.tar ec2-18-219-30-120.us-east-2.compute.amazonaws.com:/tmp
+# $ ssh -L 8000:localhost:8000 ec2-18-219-30-120.us-east-2.compute.amazonaws.com
+#
+.PHONY: venv

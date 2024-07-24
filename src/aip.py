@@ -2,4 +2,4 @@
 
 from model import create_app
 
-chat = create_app()
+aip = create_app()
