@@ -1,5 +1,4 @@
-import fastapi
-import json
+import fastapiport json
 import os
 import pydantic
 

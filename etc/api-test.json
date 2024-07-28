@@ -1,0 +1,11 @@
+{ "model": "gpt-4o-mini", 
+  "messages": [ 
+    { "role": "system",
+      "content": "You are a computer-programming assistant, skilled in explaining complex computer-programming concepts."
+    }, 
+    { 
+      "role": "user", 
+      "content": "Explain the concept of recursion in programming." 
+    }
+  ]
+}

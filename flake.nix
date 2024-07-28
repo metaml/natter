@@ -73,20 +73,27 @@
         
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
+            awscli2
             cacert
             gnumake
-            #python
-            python-pkgs.pip
+            jq
+            python
+            python-pkgs.environs
+            python-pkgs.fastapi
+            python-pkgs.gradio
+            python-pkgs.openai
+            python-pkgs.uvicorn
           ];
+
           shellHook = ''
             export LANG=en_US.UTF-8
             export PIP_PREFIX=$(pwd)/venv/pypy
             export PYTHONPATH=$(pwd)/src:$(pwd)/app:"$PIP_PREFIX/${python.sitePackages}:$PYTHONPATH"
             export PATH="$PIP_PREFIX/bin:$PATH"
             unset SOURCE_DATE_EPOCH
+            # awscli2 and openai have a dependency conflict 
+            alias aws='PYTHONPATH= aws'
             export PS1="aip|$PS1"
-            python -m venv ./venv
-            . ./venv/bin/activate
           '';
         };
         devShell = self.devShells.${system}.default;        
