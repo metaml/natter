@@ -10,11 +10,8 @@ import os
 @contextlib.asynccontextmanager
 async def lifespan(app: fastapi.FastAPI):
   client_args = {}
-  if os.getenv("LOCAL_OPENAI_ENDPOINT"):
-    # Use a local endpoint like llamafile server
-    client_args["api_key"] = "no-key-required"
-    client_args["base_url"] = os.getenv("LOCAL_OPENAI_ENDPOINT")
-    clients["openai"] = openai.AsyncOpenAI(**client_args,)
+  client_args["api_key"] = os.getenv("OPENAI_API_KEY")
+  clients["openai"] = openai.AsyncOpenAI(**client_args,)
   yield
   await clients["openai"].close()
 

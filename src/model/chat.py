@@ -1,4 +1,5 @@
-import fastapiport json
+import fastapi
+import json
 import os
 import pydantic
 
@@ -19,7 +20,7 @@ async def chat_handler(chat_request: ChatRequest):
   messages = [{"role": "system",
                "content": "You are a helpful assistant."}
              ] + chat_request.messages
-  model = "gpt-4-0125-preview"
+  model = "gpt-4o-mini"
 
   if chat_request.stream:
     async def response_stream():

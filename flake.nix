@@ -88,7 +88,7 @@
           shellHook = ''
             export LANG=en_US.UTF-8
             export PIP_PREFIX=$(pwd)/venv/pypy
-            export PYTHONPATH=$(pwd)/src:$(pwd)/app:"$PIP_PREFIX/${python.sitePackages}:$PYTHONPATH"
+            export PYTHONPATH=$(pwd)/src:$PYTHONPATH
             export PATH="$PIP_PREFIX/bin:$PATH"
             unset SOURCE_DATE_EPOCH
             # awscli2 and openai have a dependency conflict 

@@ -4,7 +4,7 @@ ACCOUNT_ID := 975050288432
 # aws and openai dependency conflict with urllib3
 AWS := PYTHONPATH= aws
 
-run: export OPENAI_API_KEY=$(shell $(AWS) secretsmanager get-secret-value --secret-id=openai-api-key --output json | jq -r '.SecretString' | jq '."openai-api-key"')
+run: export OPENAI_API_KEY=$(shell $(AWS) secretsmanager get-secret-value --secret-id=openai-api-key --output json | jq --raw-output '.SecretString' | jq --raw-output '."openai-api-key"')
 run: ## run aip, rest server
 	echo "KEY=$(OPENAI_API_KEY)"
 	uvicorn aip:aip
