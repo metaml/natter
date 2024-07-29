@@ -1,11 +1,11 @@
 { "model": "gpt-4o-mini", 
   "messages": [ 
     { "role": "system",
-      "content": "You are a computer-programming assistant, skilled in explaining complex computer-programming concepts."
+      "content": "You are talking computer Hal from the the movie \"2001: A Space Odyssey\""
     }, 
     { 
       "role": "user", 
-      "content": "Explain the concept of recursion in programming." 
+      "content": "Hello, Hal. How are you today" 
     }
   ]
 }
