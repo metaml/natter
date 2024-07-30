@@ -81,6 +81,8 @@
             python-pkgs.environs
             python-pkgs.fastapi
             python-pkgs.gradio
+            python-pkgs.jupyterlab
+            python-pkgs.notebook
             python-pkgs.openai
             python-pkgs.uvicorn
           ];
