@@ -26,9 +26,6 @@ clean: ## clean
 clobber: clean ## clobber dev env
 	rm -rf venv/*
 
-update: ## install/update python packages
-	pip install -r requirements.txt
-
 dev: ## nix develop
 	nix develop --show-trace
 
