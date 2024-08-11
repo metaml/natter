@@ -63,8 +63,15 @@ api-test: ## test openai api
 	--header "Authorization: Bearer ${OPENAI_API_KEY}" \
 	--data @"./etc/api-test.json"
 
-# $ tar cvf aip.tar --exclude='.git/*' --exclude='venv' aip
-# $ scp aip.tar ec2-18-219-30-120.us-east-2.compute.amazonaws.com:/tmp
-# $ ssh -L 8000:localhost:8000 ec2-18-219-30-120.us-east-2.compute.amazonaws.com
-#
-.PHONY: venv
+db-creds: export PYTHONPATH=# hack for aws
+db-creds: export PGUSER = $(shell aws secretsmanager get-secret-value --secret-id=db-user|awk '{print $$4}')
+db-creds: export PGPASSWORD = $(shell aws secretsmanager get-secret-value --secret-id=db-password|awk '{print $$4}')
+db-creds: export PGHOST = aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com
+db-creds: ## save db crendentials
+	@cp /dev/null .creds \
+	&& echo "export PGUSER=$(PGUSER)" >> .creds  \
+	&& echo "export PGPASSWORD=$(PGPASSWORD)" >> .creds \
+	&& echo "export PGHOST=$(PGHOST)" >> .creds
+	@echo ".creds created"
+
+

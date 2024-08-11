@@ -73,13 +73,13 @@
         
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
-            alembic
             awscli2
             cacert
             gnumake
             jq
             postgresql
             python
+            python-pkgs.asyncpg
             python-pkgs.environs
             python-pkgs.fastapi
             python-pkgs.gradio
