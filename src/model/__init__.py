@@ -1,3 +1,4 @@
+from .aws import open_api_key
 from .globals import clients
 from environs import Env
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,21 +10,24 @@ import os
 
 @contextlib.asynccontextmanager
 async def lifespan(app: fastapi.FastAPI):
+  key = os.getenv("OPENAI_API_KEY")
+  if key == None:
+    key = open_api_key()
   client_args = {}
-  client_args["api_key"] = os.getenv("OPENAI_API_KEY")
+  client_args["api_key"] = key
   clients["openai"] = openai.AsyncOpenAI(**client_args,)
   yield
   await clients["openai"].close()
 
 def create_app():
-  env = Env()
-  if not os.getenv("RUNNING_IN_PRODUCTION"):
-    env.read_env(".env")
+  if not os.getenv("AIP_DEVELOPMENT"):
     logging.basicConfig(level=logging.DEBUG)
+  else:
+    logging.basicConfig(level=logging.INFO)
+
+  origins = Env().list("ALLOWED_ORIGINS", ["http://localhost", "http://localhost:8080"])
 
   app = fastapi.FastAPI(docs_url="/", lifespan=lifespan)
-  origins = env.list("ALLOWED_ORIGINS", ["http://localhost", "http://localhost:8080"])
-
   app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

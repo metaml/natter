@@ -1,15 +1,14 @@
 .DEFAULT_GOAL = help
 
 ACCOUNT_ID := 975050288432
-# aws and openai dependency conflict with urllib3
-AWS := PYTHONPATH= aws
+AWS := PYTHONPATH= aws # aws and openai dependency conflict with urllib3
 
-OPENAI_API_KEY = $(shell $(AWS) secretsmanager get-secret-value --secret-id=openai-api-key --output json | jq --raw-output '.SecretString')
+# OPENAI_API_KEY = $(shell $(AWS) secretsmanager get-secret-value --secret-id=openai-api-key --output json | jq --raw-output '.SecretString')
 
 run: ## run aip, rest server
-	echo "KEY=$(OPENAI_API_KEY)"
 	uvicorn aip:aip
 
+run-dev: export AIP_DEVELOPMENT=1 # can be any non-null value
 run-dev: ## run aip, rest server in dev mode
 	uvicorn aip:aip --reload
 
@@ -34,7 +33,6 @@ help: ## help
 	-@grep --extended-regexp '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	| sed 's/^Makefile://1' \
 	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
-
 
 login-aws: ## login to aws to fetch/refresh token
 	PYTHONPATH= $(AWS) sso login # AdministratorAccess-975050288432
@@ -63,6 +61,12 @@ api-test: ## test openai api
 	--header "Content-Type: application/json" \
 	--header "Authorization: Bearer ${OPENAI_API_KEY}" \
 	--data @"./etc/api-test.json"
+
+sns-test: export PYTHONPATH=#
+sns-test: ## test sns
+	aws sns publish \
+	--topic-arn arn:aws:sns:us-east-2:975050288432:aip \
+	--message file://etc/sns-test.json
 
 db-creds: export PYTHONPATH=# hack for aws
 db-creds: export PGUSER = $(shell aws secretsmanager get-secret-value --secret-id=db-user|awk '{print $$4}')

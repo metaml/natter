@@ -80,12 +80,14 @@
             postgresql
             python
             python-pkgs.asyncpg
+            python-pkgs.boto3
             python-pkgs.environs
             python-pkgs.fastapi
             python-pkgs.gradio
             python-pkgs.jupyterlab
             python-pkgs.notebook
             python-pkgs.openai
+            python-pkgs.pydantic-core            
             python-pkgs.uvicorn
           ];
 
@@ -97,6 +99,7 @@
             unset SOURCE_DATE_EPOCH
             # awscli2 and openai have a dependency conflict 
             alias aws='PYTHONPATH= aws'
+            alias python=python3.12
             export PS1="aip|$PS1"
           '';
         };
