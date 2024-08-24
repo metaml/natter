@@ -13,13 +13,15 @@ async def lifespan(app: fastapi.FastAPI):
   key = os.getenv("OPENAI_API_KEY")
   if key == None:
     key = openai_api_key()
+
   client_args = {}
   client_args["api_key"] = key
-  clients["openai"] = openai.AsyncOpenAI(**client_args,)
+  clients["openai"] = openai.AsyncOpenAI(**client_args)
+
   yield
   await clients["openai"].close()
 
-def create_app():
+def app():
   if not os.getenv("AIP_DEVELOPMENT"):
     logging.basicConfig(level=logging.DEBUG)
   else:

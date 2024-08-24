@@ -6,7 +6,7 @@ AWS := PYTHONPATH= aws # aws and openai dependency conflict with urllib3
 # OPENAI_API_KEY = $(shell $(AWS) secretsmanager get-secret-value --secret-id=openai-api-key --output json | jq --raw-output '.SecretString')
 
 run: ## run aip, rest server
-	uvicorn aip:aip
+	./app/aip.py
 
 run-dev: export AIP_DEVELOPMENT=1 # can be any non-null value
 run-dev: ## run aip, rest server in dev mode
