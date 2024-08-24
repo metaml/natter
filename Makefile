@@ -3,8 +3,6 @@
 ACCOUNT_ID := 975050288432
 AWS := PYTHONPATH= aws # aws and openai dependency conflict with urllib3
 
-# OPENAI_API_KEY = $(shell $(AWS) secretsmanager get-secret-value --secret-id=openai-api-key --output json | jq --raw-output '.SecretString')
-
 run: ## run aip, rest server
 	./app/aip.py
 
@@ -56,6 +54,7 @@ image-run: image-load ## run the image
 image-clean: ## remove images
 	docker system prune -a --volumes
 
+api-test: OPENAI_API_KEY = $(shell $(AWS) secretsmanager get-secret-value --secret-id=openai-api-key --output json | jq --raw-output '.SecretString')
 api-test: ## test openai api 
 	curl https://api.openai.com/v1/chat/completions \
 	--header "Content-Type: application/json" \

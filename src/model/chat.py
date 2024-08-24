@@ -18,7 +18,7 @@ class ChatRequest(pydantic.BaseModel):
 async def chat_handler(req: ChatRequest):
   model = "gpt-4o-mini"
   messages = [{"role": "system",
-               "content": "You are a helpful assistant."}
+               "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational friend."}
              ] + req.messages
 
   if req.stream:
@@ -26,7 +26,7 @@ async def chat_handler(req: ChatRequest):
       chat_coroutine = clients["openai"].chat.completions.create(
         model    = model,
         messages = messages,
-        stream   = True,
+        stream   = req.stream,
       )
       async for event in await chat_coroutine:
         yield json.dumps(event.model_dump(), ensure_ascii=False) + "\n"
