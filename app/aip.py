@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
-from fastapi import FastAPI
+import shlex
+import subprocess as subproc
+import sys
 
-app = FastAPI()
-
-@app.get("/")
-async def root():
-    return {"Hello, World!"}
+if __name__ == '__main__':
+  try:
+    arg = shlex.split("uvicorn aip:aip --reload")
+    res = subproc.run(arg, text=True)
+  except Excepton as e:
+    print("exception: ", e, file=sys.stderr)
+    sys.exit(0)
 
