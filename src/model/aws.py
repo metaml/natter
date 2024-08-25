@@ -12,11 +12,9 @@ def publish_aip(msg: chat.Message) -> str:
   return publish(msg, aip_arn)
 
 def publish(msg: chat.Message, arn: str, msg_struct: str='json') -> str:
-  line_json = {'line': msg.content}
-  msg_json = {'default': json.dumps(line_json)}
+  # my goodness! what a stupid API!
+  msg_json = {'default': json.dumps({'line': msg.content})}
   c = boto3.client("sns")
-  print("### publish: content=", msg.content)
-  print("### publish: payload=", msg_json)
   return c.publish(Message=json.dumps(msg_json),
                    MessageStructure=msg_struct,
                    TopicArn=arn,
