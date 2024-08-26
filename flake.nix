@@ -87,7 +87,8 @@
             python-pkgs.jupyterlab
             python-pkgs.notebook
             python-pkgs.openai
-            python-pkgs.pydantic-core            
+            python-pkgs.pydantic-core
+            python-pkgs.termcolor                        
             python-pkgs.uvicorn
           ];
 
