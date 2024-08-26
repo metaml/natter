@@ -3,6 +3,7 @@ import asyncio as aio
 import fastapi
 import json
 import model.aws as aws
+import model.db as db
 import os
 import pydantic
 
@@ -42,13 +43,15 @@ async def publish(msgs: list[Message]) -> str:
     last_msg = msg
     aws.publish_aip(msg)
   return last_msg
-  
+
 @router.post("/chat")
 async def chat_handler(req: ChatRequest):
+  msgs = await aio.get_running_loop().create_task(db.history())
+  
   model = "gpt-4o"
   messages = [{"role": "system",
                "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational assistant."}
-             ] + req.messages
+             ] + msgs + req.messages 
 
   res: list[str] = await aio.gather(post(req, messages, model), publish(req.messages))
   msg = res[0]['choices'][0]['message']

@@ -20,3 +20,17 @@ def publish(msg: chat.Message, arn: str, msg_struct: str='json') -> str:
                    TopicArn=arn,
                    Subject='ITM'
                   )['MessageId']
+
+
+def credentials():
+  sec = boto3.client(service_name='secretsmanager', region_name='us-east-2')
+  u = user(sec)
+  p = passwd(sec)
+  return u['SecretString'], p['SecretString'], "aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com"
+
+def user(sec):
+  return sec.get_secret_value(SecretId='db-user')
+  return u
+
+def passwd(sec):
+  return sec.get_secret_value(SecretId='db-password')
