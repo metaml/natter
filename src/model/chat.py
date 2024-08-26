@@ -39,19 +39,20 @@ async def post(req: ChatRequest, messages: list[str], model: str):
 async def publish(msgs: list[Message]) -> str:
   last_msg = None
   for msg in msgs:
-    print("### msg=", msg)
-    print("### type(msg)=", type(msg))        
     last_msg = msg
     aws.publish_aip(msg)
   return last_msg
   
 @router.post("/chat")
 async def chat_handler(req: ChatRequest):
-  model = "gpt-4o-mini"
+  model = "gpt-4o"
   messages = [{"role": "system",
-               "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational friend."}
+               "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational assistant."}
              ] + req.messages
+
   res: list[str] = await aio.gather(post(req, messages, model), publish(req.messages))
-  print("### res=", res)
+  msg = res[0]['choices'][0]['message']
+  r = await publish([Message(content=msg['content'], role=msg['role'])])
+                    
   return res[0]
 
