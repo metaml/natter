@@ -48,7 +48,7 @@ async def publish(msgs: list[Message]) -> str:
 async def chat_handler(req: ChatRequest):
   msgs = await aio.get_running_loop().create_task(db.history())
   
-  model = "gpt-4o"
+  model = "gpt-4o-mini" # or "gpt-4o"
   messages = [{"role": "system",
                "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational assistant."}
              ] + msgs + req.messages 
