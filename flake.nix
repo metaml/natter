@@ -87,7 +87,9 @@
             python-pkgs.jupyterlab
             python-pkgs.notebook
             python-pkgs.openai
+            python-pkgs.passlib
             python-pkgs.pydantic-core
+            python-pkgs.pyjwt
             python-pkgs.termcolor                        
             python-pkgs.uvicorn
           ];
@@ -101,6 +103,7 @@
             # awscli2 and openai have a dependency conflict 
             alias aws='PYTHONPATH= aws'
             alias python=python3.12
+            if [ -f .creds ]; then source .creds; fi
             export PS1="aip|$PS1"
           '';
         };
