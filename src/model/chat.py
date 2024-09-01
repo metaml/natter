@@ -1,13 +1,14 @@
-from .globals import clients
+from .globals import clients, scheme
+from fastapi import APIRouter, Depends, FastAPI, responses
+from typing import Annotated
 import asyncio as aio
-import fastapi
 import json
 import model.aws as aws
 import model.db as db
 import os
 import pydantic
 
-router = fastapi.APIRouter()
+router = APIRouter()
 
 class Message(pydantic.BaseModel):
   content: str
@@ -27,7 +28,7 @@ async def post(req: ChatRequest, messages: list[str], model: str):
       )
       async for event in await chat_coroutine:
         yield json.dumps(event.model_dump(), ensure_ascii=False) + "\n"
-    return fastapi.responses.StreamingResponse(res_stream())
+    return responses.StreamingResponse(res_stream())
   else:
     res = await clients["openai"].chat.completions.create(
       model    = model,
@@ -45,7 +46,7 @@ async def publish(msgs: list[Message]) -> str:
   return last_msg
 
 @router.post("/chat")
-async def chat_handler(req: ChatRequest):
+async def chat(req: ChatRequest, token: Annotated[str, Depends(scheme)]):
   msgs = await aio.get_running_loop().create_task(db.history())
   
   model = "gpt-4o-mini" # or "gpt-4o"

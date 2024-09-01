@@ -1,3 +1,4 @@
+from model.user import Member
 import asyncio
 import asyncpg
 import json
@@ -10,6 +11,17 @@ async def history():
   try:
     c = await asyncpg.connect(user=u, password=p, database='aip', host=h)
     recs = await c.fetch('select message from conversation order by created_at')
+    await c.close()
+  except Exception as e:
+    print("exception:", e)
+  return [json.loads(r[0]) for r in recs]
+
+async def member(email: str) -> Member:
+  u, p, h = aws.credentials()  
+  recs = []
+  try:
+    c = await asyncpg.connect(user=u, password=p, database='aip', host=h)
+    recs = await c.fetchrow('select * from member where email=$1', email)
     await c.close()
   except Exception as e:
     print("exception:", e)

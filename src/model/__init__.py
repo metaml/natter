@@ -2,6 +2,7 @@ from .aws import openai_api_key
 from .globals import clients
 from environs import Env
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer
 import contextlib
 import fastapi
 import logging
@@ -38,7 +39,8 @@ def app():
     allow_headers=["*"],
   )
 
-  from . import chat  # noqa
+  from . import chat, user
   app.include_router(chat.router)
+  app.include_router(user.router)  
   
   return app

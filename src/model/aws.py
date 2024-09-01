@@ -21,7 +21,6 @@ def publish(msg: chat.Message, arn: str, msg_struct: str='json') -> str:
                    Subject='ITM'
                   )['MessageId']
 
-
 def credentials():
   sec = boto3.client(service_name='secretsmanager', region_name='us-east-2')
   u = user(sec)
