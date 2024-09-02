@@ -3,6 +3,7 @@ import asyncio
 import asyncpg
 import json
 import model.aws as aws
+import traceback
 
 # @todo: refactor to call credentials outside of history
 async def history():
@@ -25,4 +26,22 @@ async def member(email: str) -> Member:
     await c.close()
   except Exception as e:
     print("exception:", e)
-  return [json.loads(r[0]) for r in recs]
+
+  if recs == None:
+    return None
+  else:
+    return [json.loads(r[0]) for r in recs]
+
+async def member_add(member: Member) -> bool:
+  u, p, h = aws.credentials()  
+  try:
+    c = await asyncpg.connect(user=u, password=p, database='aip', host=h)
+    await c.execute('''insert into member (email, password, first_name, last_name, disabled)
+                                   values ($1, $2, $3, $4, $5)''',
+                    member.email, member.password, member.first_name, member.last_name, True
+                   )
+    await c.close()
+  except Exception:
+    print(traceback.format_exc())
+    return False
+  return True

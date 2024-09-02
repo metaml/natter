@@ -5,11 +5,13 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 from pydantic import BaseModel, Field
 from typing import Annotated
+import asyncio as aio
 import jwt
+import model.db as db
 
 SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+EXPIRATION = 30 # min.
 
 router = APIRouter()
 
@@ -45,29 +47,26 @@ def verify_password_plain(password_plain, password) -> bool:
   return context.verify(password_plain, password)
 
 # hash of password_plain
-def password(password_plain) -> str:
+async def hash(password_plain) -> str:
   return context.hash(password_plain)
 
-def member(email: str) -> Member:
-  return Member(email = email,
-                first_name = 'Foo',
-                last_name = 'Bar',
-                password = password("foo"))
+def member_db(email: str) -> Member:
+  return db.member(email)
 
-def authenticate(email: str, password_plain: str) -> Member:
-  m = member(email)
-  if not m:
+async def authenticate(email: str, password_plain: str) -> Member:
+  memdb = await aio.get_running_loop().create_task(member_db(email))
+  print("######## member_db=", memdb)
+  if not memdb:
     return None
   if not verify_password_plain(password_plain, m.password):
     return None
-  return m
+  return membdb
 
 def token_jwt(data: dict, expiration: timedelta):
   encode = data.copy()
   expire = datetime.now(timezone.utc) + expiration
   encode.update({"exp": expire})
-  encode_jwt = jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
-  return encode_jwt
+  return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
   
 async def current_member(token: Annotated[str, Depends(scheme)]):
   credentials_exception = HTTPException(
@@ -81,44 +80,42 @@ async def current_member(token: Annotated[str, Depends(scheme)]):
     email: str = payload.get("sub")
     if email is None:
       raise credentials_exception
-    token_data = TokenData(membmer=member)
+    token_data = TokenData(email=email)
   except InvalidTokenError:
     raise credentials_exception
 
-  member = member(email=token_data.email)
-
+  member = member_db(email=token_data.email)
   if member is None:
     raise credentials_exception
-
   return member
 
-async def current_member(current_member: Annotated[member, Depends(current_member)]):
-  if current_member.disabled:
+@router.get("/member", response_model=Member)
+async def member(member: Annotated[Member, Depends(current_member)],
+                 token: Annotated[str, Depends(scheme)]
+                ):
+  if member.disabled:
     raise HTTPException(status_code=400, detail="member not enabled")
-  return current_user
+  return member
+
+@router.post("/member/add", response_model=Member)
+async def member_add(member: Member) -> bool:
+  if member.disabled:
+    raise HTTPException(status_code=400, detail="member not enabled")
+  member.password = await hash(member.password)
+  if await db.member_add(member) == None: # mutates member.password
+    raise HTTPException(status_code=503, detail="member add failed")
+  return member
 
 @router.post("/token")
 async def token(form: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
-  member = authenticate(form.username, form.password)
+  member = await authenticate(form.username, form.password)
   if not member:
     raise HTTPException(
       status_code=status.HTTP_401_UNAUTHORIZED,
       detail="incorrect email or password",
       headers={"WWW-Authenticate": "Bearer"},
     )
-  delta = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+  delta = timedelta(minutes=EXPIRATION)
   token = token_jwt(data={"sub": member.email}, expiration=delta)
   return Token(token=token, token_type="bearer")
 
-# @app.get("/users/me/", response_model=User)
-# async def read_users_me(
-#     current_user: Annotated[User, Depends(get_current_active_user)],
-# ):
-#     return current_user
-
-
-# @app.get("/users/me/items/")
-# async def read_own_items(
-#     current_user: Annotated[User, Depends(get_current_active_user)],
-# ):
-#     return [{"item_id": "Foo", "owner": current_user.username}]
