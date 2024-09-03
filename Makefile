@@ -40,10 +40,10 @@ login-aws: ## login to aws to fetch/refresh token
 image-push: REGION = us-east-2
 image-push: DOCKER_LOGIN = $(shell $(AWS) ecr get-login-password --region $(REGION))
 image-push: image-load ## push image to ecr
-	docker tag aip:latest $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/aip:latest
+	docker tag aip:latest $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/aip-lambda:latest
 	$(AWS) ecr get-login-password --region $(REGION) \
 	| docker login --username AWS --password-stdin $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com
-	docker push $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/aip:latest
+	docker push $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/aip-lambda:latest
 
 image-load: ## load docker image
 	docker load < result
