@@ -14,7 +14,7 @@ build: ## build python package
 	nix build
 
 image: ## docker image
-	nix build --impure --verbose --option sandbox relaxed .#docker
+	nix build --platform linux/amd64 --impure --verbose --option sandbox relaxed .#docker
 
 push: image image-push ## push docker image to ecr
 
@@ -78,4 +78,5 @@ db-creds: ## save db crendentials
 	&& echo "export PGHOST=$(PGHOST)" >> .creds
 	@echo ".creds created"
 
-
+psql: ## connect to rds instance--"make db-creds" at least once
+	source ./.creds && psql
