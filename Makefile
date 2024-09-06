@@ -80,3 +80,12 @@ db-creds: ## save db crendentials
 
 psql: ## connect to rds instance--"make db-creds" at least once
 	source ./.creds && psql
+
+rsync: HOST = ec2-3-136-167-53.us-east-2.compute.amazonaws.com
+rsync: ## rsync aip to ec2 instance
+	rsync --verbose \
+	--archive \
+	--compress \
+	--progress \
+	--rsh='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' \
+	. ec2-3-136-167-53.us-east-2.compute.amazonaws.com:aip
