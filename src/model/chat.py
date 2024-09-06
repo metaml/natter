@@ -1,5 +1,7 @@
 from .globals import clients, scheme
-from fastapi import APIRouter, Depends, FastAPI, responses
+from fastapi import APIRouter, Depends, FastAPI, Request, responses
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 from typing import Annotated
 import asyncio as aio
 import json
@@ -9,6 +11,7 @@ import os
 import pydantic
 
 router = APIRouter()
+template = Jinja2Templates(directory="template")
 
 class Message(pydantic.BaseModel):
   content: str
@@ -45,6 +48,12 @@ async def publish(msgs: list[Message]) -> str:
     aws.publish_aip(msg)
   return last_msg
 
+@router.get("/home")
+async def index(req: Request, response_class=HTMLResponse):
+  return template.TemplateResponse(
+    "index.html", {"request": req, "greeting": "Salut!"}
+  )
+  
 @router.post("/chat")
 async def chat(req: ChatRequest, token: Annotated[str, Depends(scheme)]):
   msgs = await aio.get_running_loop().create_task(db.history())
