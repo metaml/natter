@@ -73,8 +73,10 @@
 
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
+            git
             awscli2
             cacert
+            docker
             gnumake
             jq
             postgresql
