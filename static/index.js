@@ -574,15 +574,6 @@
       }
     ) + '"';
   };
-  var showArrayImpl = function(f) {
-    return function(xs) {
-      var ss = [];
-      for (var i2 = 0, l = xs.length; i2 < l; i2++) {
-        ss[i2] = f(xs[i2]);
-      }
-      return "[" + ss.join(",") + "]";
-    };
-  };
 
   // output/Data.Show/index.js
   var showString = {
@@ -605,11 +596,6 @@
   };
   var show = function(dict) {
     return dict.show;
-  };
-  var showArray = function(dictShow) {
-    return {
-      show: showArrayImpl(show(dictShow))
-    };
   };
   var showRecordFieldsCons = function(dictIsSymbol) {
     var reflectSymbol2 = reflectSymbol(dictIsSymbol);
@@ -5840,22 +5826,22 @@
       headers: {
         "Content-Type": "application/json"
       }
-    }))(function(r) {
-      return bind6(r.json)(function(json3) {
+    }))(function(res) {
+      return bind6(res.json)(function(json3) {
         var js = unsafeFromForeign(json3);
-        var res = decodeJson2(js);
-        if (res instanceof Left) {
+        var res$prime = decodeJson2(js);
+        if (res$prime instanceof Left) {
           return pure3({
             messages: [],
             friend: "Courtney"
           });
         }
         ;
-        if (res instanceof Right) {
-          return pure3(res.value0);
+        if (res$prime instanceof Right) {
+          return pure3(res$prime.value0);
         }
         ;
-        throw new Error("Failed pattern match at Ami (line 38, column 3 - line 40, column 22): " + [res.constructor.name]);
+        throw new Error("Failed pattern match at Ami (line 26, column 3 - line 28, column 22): " + [res$prime.constructor.name]);
       });
     });
   };
@@ -9870,17 +9856,9 @@
   var bind9 = /* @__PURE__ */ bind(bindHalogenM);
   var get4 = /* @__PURE__ */ get2(monadStateHalogenM);
   var discard3 = /* @__PURE__ */ discard(discardUnit)(bindHalogenM);
+  var modify_4 = /* @__PURE__ */ modify_2(monadStateHalogenM);
+  var append12 = /* @__PURE__ */ append(semigroupArray);
   var pure7 = /* @__PURE__ */ pure(applicativeHalogenM);
-  var showRecord2 = /* @__PURE__ */ showRecord()();
-  var logShow2 = /* @__PURE__ */ logShow(/* @__PURE__ */ showRecord2(/* @__PURE__ */ showRecordFieldsCons({
-    reflectSymbol: function() {
-      return "content";
-    }
-  })(/* @__PURE__ */ showRecordFieldsConsNil({
-    reflectSymbol: function() {
-      return "role";
-    }
-  })(showString))(showString)));
   var messageIsSymbol = {
     reflectSymbol: function() {
       return "message";
@@ -9891,11 +9869,7 @@
       return "name";
     }
   };
-  var showRecord1 = /* @__PURE__ */ showRecord2(/* @__PURE__ */ showRecordFieldsCons(messageIsSymbol)(/* @__PURE__ */ showRecordFieldsConsNil(nameIsSymbol)(showString))(showString));
-  var logShow1 = /* @__PURE__ */ logShow(/* @__PURE__ */ showArray(showRecord1));
-  var logShow22 = /* @__PURE__ */ logShow(showRecord1);
-  var modify_4 = /* @__PURE__ */ modify_2(monadStateHalogenM);
-  var append12 = /* @__PURE__ */ append(semigroupArray);
+  var logShow2 = /* @__PURE__ */ logShow(/* @__PURE__ */ showRecord()()(/* @__PURE__ */ showRecordFieldsCons(messageIsSymbol)(/* @__PURE__ */ showRecordFieldsConsNil(nameIsSymbol)(showString))(showString)));
   var validate2 = /* @__PURE__ */ validate()()()();
   var mapRecordWithIndexCons2 = /* @__PURE__ */ mapRecordWithIndexCons(messageIsSymbol);
   var constMapping2 = /* @__PURE__ */ constMapping(mappingMkFieldStateFieldS);
@@ -9940,7 +9914,7 @@
         return attr2("aria-invalid")("false");
       }
       ;
-      throw new Error("Failed pattern match at Chat (line 98, column 34 - line 101, column 98): " + [v.context.fields.message.result.constructor.name]);
+      throw new Error("Failed pattern match at Chat (line 105, column 34 - line 108, column 98): " + [v.context.fields.message.result.constructor.name]);
     }()])]), div_([label_([]), input([type_4(InputText.value), onValueInput(v.context.actions.name.handleChange), onBlur(v.context.actions.name.handleBlur), function() {
       if (v.context.fields.name.result instanceof Nothing) {
         return placeholder("name");
@@ -9954,7 +9928,7 @@
         return attr2("aria-invalid")("false");
       }
       ;
-      throw new Error("Failed pattern match at Chat (line 108, column 34 - line 111, column 98): " + [v.context.fields.name.result.constructor.name]);
+      throw new Error("Failed pattern match at Chat (line 115, column 34 - line 118, column 98): " + [v.context.fields.name.result.constructor.name]);
     }()])]), button([type_1(ButtonSubmit.value)])([text3("Submit")])]);
   };
   var query4 = function(dictMonadAff) {
@@ -9978,48 +9952,62 @@
     };
     var onSubmit2 = function(fields) {
       return bind9(get4)(function(state3) {
-        var msg = {
-          content: fields.message,
-          role: "user"
-        };
-        var req = {
-          messages: [msg],
-          stream: false
-        };
-        return bind9(liftAff2(talk(req)))(function(v) {
-          var msg$prime = head(v.messages);
-          if (msg$prime instanceof Nothing) {
-            return discard3(liftEffect10(log2("Nothing")))(function() {
-              return pure7(unit);
-            });
+        return discard3(modify_4(function(v) {
+          var $151 = {};
+          for (var $152 in v) {
+            if ({}.hasOwnProperty.call(v, $152)) {
+              $151[$152] = v[$152];
+            }
+            ;
           }
           ;
-          if (msg$prime instanceof Just) {
-            var msg1 = {
-              message: msg$prime.value0.content,
-              name: v.friend
-            };
-            return discard3(liftEffect10(logShow2(msg$prime.value0)))(function() {
-              return discard3(liftEffect10(logShow1(state3.messages)))(function() {
-                return discard3(liftEffect10(logShow22(msg1)))(function() {
+          $151.messages = append12(state3.messages)([{
+            message: fields.message,
+            name: fields.name
+          }]);
+          return $151;
+        }))(function() {
+          var msg = {
+            content: fields.message,
+            role: "user"
+          };
+          var req = {
+            messages: [msg],
+            stream: false
+          };
+          return bind9(liftAff2(talk(req)))(function(v) {
+            var msg$prime = head(v.messages);
+            if (msg$prime instanceof Nothing) {
+              return discard3(liftEffect10(log2("Nothing")))(function() {
+                return pure7(unit);
+              });
+            }
+            ;
+            if (msg$prime instanceof Just) {
+              var msg1 = {
+                message: msg$prime.value0.content,
+                name: v.friend
+              };
+              return discard3(liftEffect10(logShow2(msg1)))(function() {
+                return bind9(get4)(function(state1) {
                   return modify_4(function(v1) {
-                    var $163 = {};
-                    for (var $164 in v1) {
-                      if ({}.hasOwnProperty.call(v1, $164)) {
-                        $163[$164] = v1[$164];
+                    var $156 = {};
+                    for (var $157 in v1) {
+                      if ({}.hasOwnProperty.call(v1, $157)) {
+                        $156[$157] = v1[$157];
                       }
                       ;
                     }
                     ;
-                    $163.messages = append12(state3.messages)([msg1]);
-                    return $163;
+                    $156.messages = append12(state1.messages)([msg1]);
+                    return $156;
                   });
                 });
               });
-            });
-          }
-          ;
-          throw new Error("Failed pattern match at Chat (line 67, column 9 - line 76, column 63): " + [msg$prime.constructor.name]);
+            }
+            ;
+            throw new Error("Failed pattern match at Chat (line 74, column 9 - line 82, column 63): " + [msg$prime.constructor.name]);
+          });
         });
       });
     };
@@ -10029,16 +10017,16 @@
     return function(v) {
       if (v instanceof Receive3) {
         return modify_4(function(v1) {
-          var $170 = {};
-          for (var $171 in v1) {
-            if ({}.hasOwnProperty.call(v1, $171)) {
-              $170[$171] = v1[$171];
+          var $163 = {};
+          for (var $164 in v1) {
+            if ({}.hasOwnProperty.call(v1, $164)) {
+              $163[$164] = v1[$164];
             }
             ;
           }
           ;
-          $170.context = v.value0;
-          return $170;
+          $163.context = v.value0;
+          return $163;
         });
       }
       ;
@@ -10063,8 +10051,8 @@
       "eval": mkEval({
         initialize: defaultEval.initialize,
         finalize: defaultEval.finalize,
-        receive: function($175) {
-          return Just.create(Receive3.create($175));
+        receive: function($168) {
+          return Just.create(Receive3.create($168));
         },
         handleAction: action(monadEffectAff),
         handleQuery: query4(monadAffAff)
