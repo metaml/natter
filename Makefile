@@ -13,10 +13,10 @@ run-dev: ## run aip, rest server in dev mode
 build: ## build python package
 	nix build
 
+push: image image-push update-lambda ## * make and push docker-image to ecr; update lambda *
+
 image: ## docker image
 	nix build --impure --verbose --option sandbox relaxed .#docker
-
-push: image image-push ## push docker image to ecr
 
 clean: ## clean
 	find . -name \*~ | xargs rm -f
@@ -31,6 +31,7 @@ help: ## help
 	-@grep --extended-regexp '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	| sed 's/^Makefile://1' \
 	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
+	-@echo "NB: \"*\" updates AWS"
 
 login-aws: ## login to aws to fetch/refresh token
 	PYTHONPATH= $(AWS) sso login # AdministratorAccess-975050288432
@@ -39,7 +40,7 @@ login-aws: ## login to aws to fetch/refresh token
 
 image-push: REGION = us-east-2
 image-push: DOCKER_LOGIN = $(shell $(AWS) ecr get-login-password --region $(REGION))
-image-push: image-load ## push image to ecr
+image-push: image-load ## * push image to ecr *
 	docker tag aip:latest $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/aip-lambda:latest
 	$(AWS) ecr get-login-password --region $(REGION) \
 	| docker login --username AWS --password-stdin $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com
@@ -53,6 +54,11 @@ image-run: image-load ## run the image
 
 image-clean: ## remove images
 	docker system prune -a --volumes
+
+lambda-update: IMAGE_URI = 975050288432.dkr.ecr.us-east-2.amazonaws.com/aip-lambda:latest
+lambda-update: push ## * make and push docker-image to ecr *
+	aws lambda update-function-code --function-name=sns2rds --image-uri=$(IMAGE_URI)
+	aws lambda update-function-code --function-name=s32rds --image-uri=$(IMAGE_URI)
 
 api-test: OPENAI_API_KEY = $(shell $(AWS) secretsmanager get-secret-value --secret-id=openai-api-key --output json | jq --raw-output '.SecretString')
 api-test: ## test openai api
