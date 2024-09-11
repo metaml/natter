@@ -55,7 +55,7 @@ image-clean: ## remove images
 	docker system prune -a --volumes
 
 api-test: OPENAI_API_KEY = $(shell $(AWS) secretsmanager get-secret-value --secret-id=openai-api-key --output json | jq --raw-output '.SecretString')
-api-test: ## test openai api 
+api-test: ## test openai api
 	curl https://api.openai.com/v1/chat/completions \
 	--header "Content-Type: application/json" \
 	--header "Authorization: Bearer ${OPENAI_API_KEY}" \
@@ -88,4 +88,4 @@ rsync: ## rsync aip to ec2 instance
 	--compress \
 	--progress \
 	--rsh='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' \
-	. ec2-3-136-167-53.us-east-2.compute.amazonaws.com:aip
+	. ec2-3-136-167-53.us-east-2.compute.amazonaws.com:ami
