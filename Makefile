@@ -14,7 +14,7 @@ build: ## build python package
 	nix build
 
 image: ## docker image
-	nix build --platform linux/amd64 --impure --verbose --option sandbox relaxed .#docker
+	nix build --impure --verbose --option sandbox relaxed .#docker
 
 push: image image-push ## push docker image to ecr
 
