@@ -105,7 +105,7 @@
             alias aws='PYTHONPATH= aws'
             alias python=python3.12
             if [ -f .creds ]; then source .creds; fi
-            export PS1="ami|$PS1"
+            if [ "$LOGNAME" != "root" ]; then export PS1="ami|$PS1"; fi
           '';
         };
         devShell = self.devShells.${system}.default;
