@@ -39,7 +39,7 @@ help: ## help
 	-@printf "$(RED)note$(CLR): \"*\" means updates to AWS\n"
 	-@grep --extended-regexp '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	| sed 's/^Makefile://1' \
-	| awk 'BEGIN {FS = ":.*?## "}; {printf "$(YEL)%-18s$(CLR) %s\n", $$1, $$2}'
+	| awk 'BEGIN {FS = ":.*?## "}; {printf "$(BLU)%-18s$(CLR) %s\n", $$1, $$2}'
 #	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
 login-aws: ## login to aws to fetch/refresh token
