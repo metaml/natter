@@ -66,8 +66,7 @@
               "SSL_CERT_FILE=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
               "SYSTEM_CERTIFICATE_PATH=${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt"
             ];
-            EntryPoint = [ "/bin/bash" ];
-            #CMD = [ "app.aip:app" ];
+            CMD = [ "/bin/bash" ];
           };
         };
 

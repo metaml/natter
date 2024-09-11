@@ -27,11 +27,20 @@ clobber: clean ## clobber dev env
 dev: ## nix develop
 	nix develop --show-trace
 
+help: BLU = \033[1;34m
+help: CYA = \033[1;36m
+help: GRN = \033[1;32m
+help: ORA = \033[0;33m# looks yellow
+help: PRP = \033[1;35m
+help: RED = \033[1;31m
+help: YEL = \033[1;33m
+help: CLR = \033[0m# clear, no color
 help: ## help
+	-@printf "$(RED)note$(CLR): \"*\" means updates to AWS\n"
 	-@grep --extended-regexp '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	| sed 's/^Makefile://1' \
-	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
-	-@echo "NB: \"*\" updates AWS"
+	| awk 'BEGIN {FS = ":.*?## "}; {printf "$(YEL)%-18s$(CLR) %s\n", $$1, $$2}'
+#	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
 login-aws: ## login to aws to fetch/refresh token
 	PYTHONPATH= $(AWS) sso login # AdministratorAccess-975050288432
@@ -96,3 +105,12 @@ rsync: ## rsync aip to ec2 instance
 	--rsh='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' \
 	. ec2-3-136-167-53.us-east-2.compute.amazonaws.com:ami
 	ssh ami 'cd ami && chown -R root .'
+
+# Black        0;30     Dark Gray     1;30
+# Red          0;31     Light Red     1;31
+# Green        0;32     Light Green   1;32
+# Brown/Orange 0;33     Yellow        1;33
+# Blue         0;34     Light Blue    1;34
+# Purple       0;35     Light Purple  1;35
+# Cyan         0;36     Light Cyan    1;36
+# Light Gray   0;37     White         1;37
