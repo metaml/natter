@@ -13,7 +13,9 @@ run-dev: ## run aip, rest server in dev mode
 build: ## build python package
 	nix build
 
-push: image image-push lambda-update ## * make and push docker-image to ecr; update lambda *
+lambda: push lambda-update ## push image and update lambda
+
+push: image image-push ## * make and push docker-image to ecr; update lambda *
 
 image: ## docker image
 	nix build --impure --verbose --option sandbox relaxed .#docker
@@ -65,8 +67,8 @@ image-clean: ## remove images
 	docker system prune -a --volumes
 
 lambda-update: IMAGE_URI = 975050288432.dkr.ecr.us-east-2.amazonaws.com/aip-lambda:latest
-lambda-update: push ## * make and push docker-image to ecr *
-	aws lambda update-function-code --function-name=sns2rds --image-uri=$(IMAGE_URI)
+lambda-update: ## update lambda with its docker image
+	aws lambda update-function-code --function-name=sns2s3 --image-uri=$(IMAGE_URI)
 	aws lambda update-function-code --function-name=s32rds --image-uri=$(IMAGE_URI)
 
 api-test: OPENAI_API_KEY = $(shell $(AWS) secretsmanager get-secret-value --secret-id=openai-api-key --output json | jq --raw-output '.SecretString')
