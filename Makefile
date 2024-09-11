@@ -13,7 +13,7 @@ run-dev: ## run aip, rest server in dev mode
 build: ## build python package
 	nix build
 
-push: image image-push update-lambda ## * make and push docker-image to ecr; update lambda *
+push: image image-push lambda-update ## * make and push docker-image to ecr; update lambda *
 
 image: ## docker image
 	nix build --impure --verbose --option sandbox relaxed .#docker
