@@ -68,8 +68,8 @@ image-clean: ## remove images
 
 lambda-update: IMAGE_URI = 975050288432.dkr.ecr.us-east-2.amazonaws.com/aip-lambda:latest
 lambda-update: ## update lambda with its docker image
-	aws lambda update-function-code --function-name=sns2s3 --image-uri=$(IMAGE_URI)
-	aws lambda update-function-code --function-name=s32rds --image-uri=$(IMAGE_URI)
+	$(AWS) lambda update-function-code --function-name=sns2s3 --image-uri=$(IMAGE_URI)
+	$(AWS) lambda update-function-code --function-name=s32rds --image-uri=$(IMAGE_URI)
 
 api-test: OPENAI_API_KEY = $(shell $(AWS) secretsmanager get-secret-value --secret-id=openai-api-key --output json | jq --raw-output '.SecretString')
 api-test: ## test openai api
