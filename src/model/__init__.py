@@ -3,6 +3,7 @@ from .globals import clients
 from environs import Env
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
+from fastapi.staticfiles import StaticFiles
 import contextlib
 import fastapi
 import logging
@@ -28,9 +29,18 @@ def app():
   else:
     logging.basicConfig(level=logging.INFO)
 
-  origins = Env().list("ALLOWED_ORIGINS", ["http://localhost", "http://localhost:8080"])
-
+  origins = Env().list("ALLOWED_ORIGINS", ["http://localhost",
+                                           "https://localhost",
+                                           "http://localhost:8000",
+                                           "http://127.0.0.1:8000",
+                                           "https://localhost:8000",
+                                           "http://localhost:8080",
+                                           "https://localhost:8000",
+                                          ]
+                      )
   app = fastapi.FastAPI(docs_url="/", lifespan=lifespan)
+
+  app.mount("/static", StaticFiles(directory="static"), name="static")
   app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -41,6 +51,6 @@ def app():
 
   from . import chat, user
   app.include_router(chat.router)
-  app.include_router(user.router)  
-  
+  app.include_router(user.router)
+
   return app

@@ -19,7 +19,11 @@ class Message(pydantic.BaseModel):
 
 class ChatRequest(pydantic.BaseModel):
   messages: list[Message]
-  stream: bool = True
+  stream: bool = False
+
+class ChatResponse(pydantic.BaseModel):
+  messages: list[Message]
+  friend: str = 'Courtney'
 
 async def post(req: ChatRequest, messages: list[str], model: str):
   if req.stream:
@@ -38,6 +42,7 @@ async def post(req: ChatRequest, messages: list[str], model: str):
       messages = messages,
       stream   = req.stream,
     )
+    print("######## res=", res)
     return res.model_dump()
 
 # @todo: implement using async
@@ -53,19 +58,33 @@ async def index(req: Request, response_class=HTMLResponse):
   return template.TemplateResponse(
     "index.html", {"request": req, "greeting": "Salut!"}
   )
-  
+
 @router.post("/chat")
 async def chat(req: ChatRequest, token: Annotated[str, Depends(scheme)]):
   msgs = await aio.get_running_loop().create_task(db.history())
-  
+
   model = "gpt-4o-mini" # or "gpt-4o"
   messages = [{"role": "system",
                "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational assistant."}
-             ] + msgs + req.messages 
+             ] + msgs + req.messages
 
   res: list[str] = await aio.gather(post(req, messages, model), publish(req.messages))
   msg = res[0]['choices'][0]['message']
   r = await publish([Message(content=msg['content'], role=msg['role'])])
-                    
+
   return res[0]
 
+@router.post("/talk")
+async def talk(req: ChatRequest):
+  msgs = await aio.get_running_loop().create_task(db.history())
+
+  model = "gpt-4o-mini" # or "gpt-4o"
+  messages = [{"role": "system",
+               "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational assistant."}
+             ] + msgs + req.messages
+
+  res: list[str] = await aio.gather(post(req, messages, model), publish(req.messages))
+  msg = res[0]['choices'][0]['message']
+  r = await publish([Message(content=msg['content'], role=msg['role'])])
+  print("######## msg=", msg)
+  return ChatResponse(messages = [ Message(content=msg['content'], role=msg['role']) ])

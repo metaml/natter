@@ -5,7 +5,7 @@
     nixpkgs     = { url = "nixpkgs/nixpkgs-unstable"; };
     utils       = { url = "github:numtide/flake-utils"; };
   };
-  
+
   outputs = { self, nixpkgs, utils }:
     utils.lib.eachDefaultSystem (system:
       let
@@ -70,7 +70,7 @@
             #CMD = [ "app.aip:app" ];
           };
         };
-        
+
         devShells.default = pkgs.mkShell {
           packages = with pkgs; [
             awscli2
@@ -84,14 +84,14 @@
             python-pkgs.environs
             python-pkgs.fastapi
             python-pkgs.gradio
-            python-pkgs.jinja2            
+            python-pkgs.jinja2
             python-pkgs.jupyterlab
             python-pkgs.notebook
             python-pkgs.openai
             python-pkgs.passlib
             python-pkgs.pydantic-core
             python-pkgs.pyjwt
-            python-pkgs.termcolor                        
+            python-pkgs.termcolor
             python-pkgs.uvicorn
           ];
 
@@ -101,14 +101,14 @@
             export PYTHONPATH=$(pwd)/src:$PYTHONPATH
             export PATH="$PIP_PREFIX/bin:$PATH"
             unset SOURCE_DATE_EPOCH
-            # awscli2 and openai have a dependency conflict 
+            # awscli2 and openai have a dependency conflict
             alias aws='PYTHONPATH= aws'
             alias python=python3.12
             if [ -f .creds ]; then source .creds; fi
-            export PS1="aip|$PS1"
+            export PS1="ami|$PS1"
           '';
         };
-        devShell = self.devShells.${system}.default;        
+        devShell = self.devShells.${system}.default;
       }
     );
 }
