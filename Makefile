@@ -3,6 +3,7 @@
 ACCOUNT_ID := 975050288432
 AWS := PYTHONPATH= aws # aws and openai dependency conflict with urllib3
 
+run: AWS_DEFAULT_GATEWAY = us-east-2
 run: ## run aip, rest server
 	./app/aip.py
 

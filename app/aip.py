@@ -11,7 +11,7 @@ if __name__ == '__main__':
   if dev:
     port, log = 8000, "debug"
   else:
-    port, log = 443, "info"
+    port, log = 80, "info"
 
   try:
     arg = shlex.split(f"uvicorn aip:aip --host 0.0.0.0 --port {port} --log-level {log}")
