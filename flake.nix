@@ -39,8 +39,15 @@
                                gnumake
                                jq
                              ];
-      in { #packages.${pname} = python.pkgs.buildPythonApplication rec {
-           packages.default = python.pkgs.buildPythonApplication rec {
+          shell-hook = ''
+            export LANG=en_US.UTF-8
+            export PYTHONPATH=$(pwd)/src:$PYTHONPATH
+            export PS1="ami|$PS1"
+            # awscli2 and openai have a dependency conflict
+            [ ! -f .creds ] || source .creds
+            alias aws='PYTHONPATH= aws'
+          '';
+      in { packages.default = python.pkgs.buildPythonApplication rec {
              pname   = "$(pname)";
              version = "${pversion}";
              src     = self;
@@ -52,18 +59,10 @@
            };
            defaultPackage = self.packages.${system}.default;
 
-           devShell = pkgs.mkShell { buildInputs = pdeps ++ ddeps;
-                                     shellHook = ''
-                                       export LANG=en_US.UTF-8
-                                       export PYTHONPATH=$(pwd)/src:$PYTHONPATH
-                                       export PS1="ami|$PS1"
-                                       # awscli2 and openai have a dependency conflict
-                                       if [ -f .creds ]; then source .creds; fi
-                                       alias aws='PYTHONPATH= aws'
-                                       alias m=make
-                                       alias b='m build'
-                                     '';
-                                   };
+           devShells.default = pkgs.mkShell { buildInputs = pdeps ++ ddeps;
+                                              shellHook = "${shell-hook}";
+                                            };
+           devShell = self.devShells.${system}.default;
          }
     );
 }
