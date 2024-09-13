@@ -44,13 +44,15 @@
             [ ! -f .creds ] || source .creds
             alias aws='PYTHONPATH= aws'
           '';
-      in { packages.default = python.pkgs.buildPythonApplication rec {
+      in { # runtime environment
+           packages.default = python.pkgs.buildPythonApplication rec {
              pname   = "$(pname)";
              version = "${pversion}";
              src     = self;
              format  = "other";
              doCheck = false;
              propagatedBuildInputs = runtime-deps;
+             # nb: odd behaviour in that nix build seems to introspect the string below
              installPhase          = ''mkdir -p $out/bin;
                                        cp -p ./app/ami.py $out/bin;
                                        cp -ap src $out/lib
@@ -58,6 +60,25 @@
            };
            defaultPackage = self.packages.${system}.default;
 
+           # docker image
+           packages.docker = pkgs.dockerTools.buildImage {
+             name = "${pname}";
+             tag = "latest";
+             created = "now";
+             copyToRoot = pkgs.buildEnv {
+               name = "${pname}";
+               paths = with pkgs; [
+                 bashInteractive
+                 cacert
+                 coreutils
+                 python
+                 self.defaultPackage.${system}
+               ];
+               pathsToLink = [ "/bin" "/usr" ];
+             };
+           };
+
+           # buld environment
            devShells.default = pkgs.mkShell { buildInputs = build-deps ++ runtime-deps;
                                               shellHook = "${shell-hook}";
                                             };
