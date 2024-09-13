@@ -33,6 +33,7 @@
         };
 
         apps.default = rec {
+          program = "app/ami.py";
           ami = utils.lib.mkApp { drv = self.packages.${system}.ami; };
           default = ami;
         };

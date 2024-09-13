@@ -3,9 +3,9 @@
 ACCOUNT_ID := 975050288432
 AWS := PYTHONPATH= aws # aws and openai dependency conflict with urllib3
 
-run: AWS_DEFAULT_GATEWAY = us-east-2
-run: ## run aip, rest server
-	./app/aip.py
+run: export AWS_DEFAULT_REGION = us-east-2
+run: ## run ami, rest server
+	./app/ami.py
 
 run-dev: export AIP_DEVELOPMENT=1 # can be any non-null value
 run-dev: ## run aip, rest server in dev mode
@@ -52,25 +52,20 @@ login-aws: ## login to aws to fetch/refresh token
 
 image-push: REGION = us-east-2
 image-push: DOCKER_LOGIN = $(shell $(AWS) ecr get-login-password --region $(REGION))
-image-push: image-load ## * push image to ecr *
-	docker tag aip:latest $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/aip-lambda:latest
+image-push: ## * push image to ecr *
+	docker tag ami-rest:latest $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/ami-rest:latest
 	$(AWS) ecr get-login-password --region $(REGION) \
 	| docker login --username AWS --password-stdin $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com
-	docker push $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/aip-lambda:latest
+	docker push $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/ami-rest:latest
 
 image-load: ## load docker image
 	docker load < result
 
-image-run: image-load ## run the image
-	docker run --platform linux/am64 --interactive --tty --rm aip
+image-run: ## run the image
+	docker run --platform linux/am64 --interactive --tty --rm ami-rest
 
 image-clean: ## remove images
 	docker system prune -a --volumes
-
-lambda-update: IMAGE_URI = 975050288432.dkr.ecr.us-east-2.amazonaws.com/aip-lambda:latest
-lambda-update: ## update lambda with its docker image
-	$(AWS) lambda update-function-code --function-name=sns2s3 --image-uri=$(IMAGE_URI)
-	$(AWS) lambda update-function-code --function-name=s32rds --image-uri=$(IMAGE_URI)
 
 api-test: OPENAI_API_KEY = $(shell $(AWS) secretsmanager get-secret-value --secret-id=openai-api-key --output json | jq --raw-output '.SecretString')
 api-test: ## test openai api
@@ -100,7 +95,7 @@ psql: ## connect to rds instance--"make db-creds" at least once
 	source ./.creds && psql
 
 rsync: HOST = ec2-3-136-167-53.us-east-2.compute.amazonaws.com
-rsync: ## rsync aip to ec2 instance
+rsync: ## rsync ami to ec2 instance
 	rsync --verbose \
 	--archive \
 	--compress \
