@@ -11,8 +11,9 @@ run-dev: export AIP_DEVELOPMENT=1 # can be any non-null value
 run-dev: ## run aip, rest server in dev mode
 	uvicorn aip:aip --reload
 
+# nix build --debug --verbose -L .#dist-files
 build: ## build python package
-	nix build
+	nix build # --impure --debug
 
 lambda: push lambda-update ## push image and update lambda
 
@@ -28,7 +29,7 @@ clobber: clean ## clobber dev env
 	rm -rf venv/*
 
 dev: ## nix develop
-	nix develop --show-trace
+	nix develop --impure
 
 help: BLU = \033[1;34m
 help: CYA = \033[1;36m
@@ -43,7 +44,6 @@ help: ## help
 	-@grep --extended-regexp '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	| sed 's/^Makefile://1' \
 	| awk 'BEGIN {FS = ":.*?## "}; {printf "$(BLU)%-18s$(CLR) %s\n", $$1, $$2}'
-#	| awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-18s\033[0m %s\n", $$1, $$2}'
 
 login-aws: ## login to aws to fetch/refresh token
 	PYTHONPATH= $(AWS) sso login # AdministratorAccess-975050288432
