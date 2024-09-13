@@ -54,8 +54,10 @@
              format  = "other";
              doCheck = false;
              propagatedBuildInputs = pdeps ++ bdeps;
-             #installPhase = "install -Dm755 ./app/ami.py $out/bin/ami.py";
-             installPhase = "mkdir -p $out/bin && cp -p ./app/ami.py $out/bin && cp -ap src $out/lib";
+             installPhase          = ''mkdir -p $out/bin
+                                       && cp -p ./app/ami.py $out/bin
+                                       && cp -ap src $out/lib
+                                     '';
            };
            defaultPackage = self.packages.${system}.default;
 
