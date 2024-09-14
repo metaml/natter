@@ -8,7 +8,7 @@
 
   outputs = { self, nixpkgs, utils }:
     utils.lib.eachDefaultSystem ( system:
-      let pname    = "ami";
+      let pnom    = "ami";
           pversion = "0.1.0.0";
           runtime-deps    = [ pkgs.cacert
                               python
@@ -46,27 +46,25 @@
           '';
       in { # runtime environment
            packages.default = python.pkgs.buildPythonApplication rec {
-             pname   = "$(pname)";
+             pname   = "${pnom}";
              version = "${pversion}";
              src     = self;
              format  = "other";
              doCheck = false;
              propagatedBuildInputs = runtime-deps;
              # nb: odd behaviour in that nix build seems to introspect the string below
-             installPhase          = ''mkdir -p $out/bin;
-                                       cp -p ./app/ami.py $out/bin;
-                                       cp -ap src $out/lib
-                                     '';
+             installPhase = "mkdir -p $out/bin; cp -p app/ami.py $out/bin/ami.py; cp -ap src $out/lib";
+             postFixup = "wrapProgram $out/bin/ami.py --prefix PYTHONPATH : $PYTHONPATH --prefix PATH : ${python}/bin";
            };
            defaultPackage = self.packages.${system}.default;
 
            # docker image
            packages.docker = pkgs.dockerTools.buildImage {
-             name = "${pname}";
+             name = "${pnom}";
              tag = "latest";
              created = "now";
              copyToRoot = pkgs.buildEnv {
-               name = "${pname}";
+               name = "${pnom}";
                paths = with pkgs; [
                  bashInteractive
                  cacert

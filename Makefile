@@ -7,7 +7,7 @@ run: export AWS_DEFAULT_REGION = us-east-2
 run: ## run ami, rest server
 	./app/ami.py
 
-run-dev: export AIP_DEVELOPMENT=1 # can be any non-null value
+run-dev: export AMI_DEV=1 # can be any non-null value
 run-dev: ## run aip, rest server in dev mode
 	uvicorn aip:aip --reload
 
@@ -21,6 +21,9 @@ push: image image-push ## * make and push docker-image to ecr; update lambda *
 
 image: ## docker image
 	nix build --impure --verbose --option sandbox relaxed .#docker
+
+install: ## install ami flake
+	nix profile install
 
 clean: ## clean
 	find . -name \*~ | xargs rm -f

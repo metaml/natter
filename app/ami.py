@@ -8,7 +8,7 @@ import sys
 os.environ["AWS_DEFAULT_REGION"] = "us-east-2"
 
 if __name__ == '__main__':
-  dev = os.getenv('AIP_DEVELOPMENT')
+  dev = os.getenv('AMI_DEV')
   port, log = None, None
   if dev:
     port, log = 8000, "debug"
