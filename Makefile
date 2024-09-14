@@ -25,6 +25,9 @@ image: ## docker image
 install: ## @ install ami flake @
 	nix profile install
 
+remove: ## @ remove ami flake @
+	nix profile remove '.*'
+
 clean: ## clean
 	find . -name \*~ | xargs rm -f
 
