@@ -29,7 +29,6 @@ def credentials():
 
 def user(sec):
   return sec.get_secret_value(SecretId='db-user')
-  return u
 
 def passwd(sec):
   return sec.get_secret_value(SecretId='db-password')
