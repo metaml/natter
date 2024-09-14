@@ -54,7 +54,7 @@
              propagatedBuildInputs = runtime-deps;
              # nb: odd behaviour in that nix build seems to introspect the string below
              installPhase = "mkdir -p $out/bin; cp -p app/ami.py $out/bin/ami.py; cp -ap src $out/lib";
-             postFixup = "wrapProgram $out/bin/ami.py --prefix PYTHONPATH : $PYTHONPATH --prefix PYTHONPATH : $out/lib --prefix PATH : ${python}/bin";
+             postFixup = "wrapProgram $out/bin/ami.py --prefix PYTHONPATH : $out/lib --prefix PYTHONPATH : $PYTHONPATH  --prefix PATH : ${python}/bin";
            };
            defaultPackage = self.packages.${system}.default;
 
