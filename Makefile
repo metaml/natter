@@ -22,7 +22,7 @@ push: image image-push ## * make and push docker-image to ecr; update lambda *
 image: ## docker image
 	nix build --impure --verbose --option sandbox relaxed .#docker
 
-install: ## install ami flake
+install: ## @ install ami flake @
 	nix profile install
 
 clean: ## clean
@@ -31,7 +31,7 @@ clean: ## clean
 clobber: clean ## clobber dev env
 	rm -rf venv/*
 
-dev: ## nix develop
+dev: ## @ nix develop @
 	nix develop --impure
 
 help: BLU = \033[1;34m
@@ -42,8 +42,9 @@ help: PRP = \033[1;35m
 help: RED = \033[1;31m
 help: YEL = \033[1;33m
 help: CLR = \033[0m# clear, no color
-help: ## help
-	-@printf "$(RED)note$(CLR): \"*\" means updates to AWS\n"
+help: ## * help
+	-@printf "$(RED)note$(CLR): \"*\" updates AWS\n" ''
+	-@printf "%-6s\"@\" indpendent of nix develop\n" ""
 	-@grep --extended-regexp '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
 	| sed 's/^Makefile://1' \
 	| awk 'BEGIN {FS = ":.*?## "}; {printf "$(BLU)%-18s$(CLR) %s\n", $$1, $$2}'
