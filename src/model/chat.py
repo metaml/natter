@@ -42,7 +42,6 @@ async def post(req: ChatRequest, messages: list[str], model: str):
       messages = messages,
       stream   = req.stream,
     )
-    print("######## res=", res)
     return res.model_dump()
 
 # @todo: implement using async
@@ -86,5 +85,4 @@ async def talk(req: ChatRequest):
   res: list[str] = await aio.gather(post(req, messages, model), publish(req.messages))
   msg = res[0]['choices'][0]['message']
   r = await publish([Message(content=msg['content'], role=msg['role'])])
-  print("######## msg=", msg)
   return ChatResponse(messages = [ Message(content=msg['content'], role=msg['role']) ])

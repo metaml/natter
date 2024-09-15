@@ -24,7 +24,7 @@ async def lifespan(app: fastapi.FastAPI):
   await clients["openai"].close()
 
 def app():
-  if not os.getenv("AIP_DEVELOPMENT"):
+  if not os.getenv("DEV_AMI"):
     logging.basicConfig(level=logging.DEBUG)
   else:
     logging.basicConfig(level=logging.INFO)
@@ -40,7 +40,7 @@ def app():
                       )
   app = fastapi.FastAPI(docs_url="/", lifespan=lifespan)
 
-  app.mount("/static", StaticFiles(directory="static"), name="static")
+  app.mount("/static", StaticFiles(directory=static()), name="static")
   app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -55,3 +55,10 @@ def app():
   app.include_router(pong.router)
 
   return app
+
+def static() -> str:
+  s = os.getenv("STATIC_AMI")
+  if s:
+    return os.getenv("STATIC_AMI")
+  else:
+    return s

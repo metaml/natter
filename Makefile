@@ -23,10 +23,10 @@ image: ## docker image
 	nix build --impure --verbose --option sandbox relaxed .#docker
 
 install: ## @ install ami flake @
-	nix profile install
+	nix profile install #ami
 
 remove: ## @ remove ami flake @
-	nix profile remove '.*'
+	nix profile remove #ami
 
 clean: ## clean
 	find . -name \*~ | xargs rm -f
