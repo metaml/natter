@@ -29,13 +29,10 @@ def app():
   else:
     logging.basicConfig(level=logging.INFO)
 
-  origins = Env().list("ALLOWED_ORIGINS", ["http://localhost",
-                                           "https://localhost",
-                                           "http://localhost:8000",
-                                           "http://127.0.0.1:8000",
-                                           "https://localhost:8000",
-                                           "http://localhost:8080",
-                                           "https://localhost:8000",
+  origins = Env().list("ALLOWED_ORIGINS", [ "http://alb-1952262379.us-east-2.elb.amazonaws.com",
+                                            "http://alb-1952262379.us-east-2.elb.amazonaws.com:8000",
+                                            "http://localhost",
+                                            "https://localhost:8000",
                                           ]
                       )
   app = fastapi.FastAPI(docs_url="/", lifespan=lifespan)

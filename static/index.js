@@ -5741,7 +5741,7 @@
   })()())());
   var pure3 = /* @__PURE__ */ pure(applicativeAff);
   var talk = function(req) {
-    return bind5(fetch3("http://localhost:8000/talk")({
+    return bind5(fetch3("http://alb-1952262379.us-east-2.elb.amazonaws.com:8000/talk")({
       method: POST.value,
       body: stringify(encodeJson2(req)),
       headers: {
