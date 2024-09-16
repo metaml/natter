@@ -15,7 +15,7 @@ template = Jinja2Templates(directory="template")
 
 class Message(pydantic.BaseModel):
   content: str
-  role: str = "user"
+  role: str
 
 class ChatRequest(pydantic.BaseModel):
   messages: list[Message]
@@ -75,14 +75,23 @@ async def chat(req: ChatRequest, token: Annotated[str, Depends(scheme)]):
 
 @router.post("/talk")
 async def talk(req: ChatRequest):
-  msgs = await aio.get_running_loop().create_task(db.history())
+  msg = req.messages[0]
+  member = msg.role
+  if member != 'system':
+    msg.role = 'user'
+  await aio.get_running_loop().create_task(db.conversation_add(msg, member, 'Courtney'))
 
   model = "gpt-4o-mini" # or "gpt-4o"
-  messages = [{"role": "system",
-               "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational assistant."}
-             ] + msgs + req.messages
+  history = await aio.get_running_loop().create_task(db.history())
+  prompts = [{"role": "system",
+              "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational assistant."}
+            ] + history + [msg]
 
-  res: list[str] = await aio.gather(post(req, messages, model), publish(req.messages))
-  msg = res[0]['choices'][0]['message']
-  r = await publish([Message(content=msg['content'], role=msg['role'])])
-  return ChatResponse(messages = [ Message(content=msg['content'], role=msg['role']) ])
+  res = await post(req, prompts, model)
+  print("### talk: res=", res)
+  message_res = res['choices'][0]['message']
+  msg_res = Message(content=message_res['content'], role=message_res['role'])
+  print("### talk: msg_res=", msg_res)
+  await aio.get_running_loop().create_task(db.conversation_add(msg_res, member, 'Courtney'))
+
+  return ChatResponse(messages = [msg_res])

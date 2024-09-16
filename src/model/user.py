@@ -17,8 +17,8 @@ router = APIRouter()
 
 class Message(BaseModel):
   content: str
-  role: str = "user"
-  
+  role: str;
+
 class Member(BaseModel):
   email: str
   first_name: str
@@ -67,14 +67,14 @@ def token_jwt(data: dict, expiration: timedelta):
   expire = datetime.now(timezone.utc) + expiration
   encode.update({"exp": expire})
   return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
-  
+
 async def current_member(token: Annotated[str, Depends(scheme)]):
   credentials_exception = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
     detail="wrong credentials",
     headers={"WWW-Authenticate": "Bearer"},
   )
-  
+
   try:
     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     email: str = payload.get("sub")
@@ -118,4 +118,3 @@ async def token(form: Annotated[OAuth2PasswordRequestForm, Depends()]) -> Token:
   delta = timedelta(minutes=EXPIRATION)
   token = token_jwt(data={"sub": member.email}, expiration=delta)
   return Token(token=token, token_type="bearer")
-
