@@ -7,7 +7,7 @@ run: export AWS_DEFAULT_REGION = us-east-2
 run: ## run ami, rest server
 	./app/ami.py
 
-run-dev: export AMI_DEV=1 # can be any non-null value
+run-dev: export DEV_AMI = 1
 run-dev: ## run aip, rest server in dev mode
 	uvicorn aip:aip --reload
 

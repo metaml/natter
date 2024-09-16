@@ -40,7 +40,8 @@ def app():
                       )
   app = fastapi.FastAPI(docs_url="/", lifespan=lifespan)
 
-  app.mount("/static", StaticFiles(directory=static()), name="static")
+  # fastapi only references relative directory paths
+  app.mount("/static", StaticFiles(directory="static"), name="static")
   app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -55,10 +56,3 @@ def app():
   app.include_router(pong.router)
 
   return app
-
-def static() -> str:
-  s = os.getenv("STATIC_AMI")
-  if s:
-    return os.getenv("STATIC_AMI")
-  else:
-    return s

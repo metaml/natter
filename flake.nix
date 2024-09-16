@@ -28,13 +28,14 @@
                               python-pkgs.termcolor
                               python-pkgs.uvicorn
                             ];
-          build-deps = with pkgs; [ awscli2
-                                    git
-                                    python-pkgs.setuptools
-                                    docker
-                                    gnumake
-                                    jq
-                                  ];
+          dev-deps = with pkgs; [ awscli2
+                                  docker
+                                  git
+                                  gnumake
+                                  jq
+                                  postgresql_16
+                                  python-pkgs.setuptools
+                                ];
           pkgs        = nixpkgs.legacyPackages.${system};
           python      = pkgs.python312;
           python-pkgs = pkgs.python312Packages;
@@ -101,7 +102,7 @@
            };
 
            # buld environment
-           devShells.default = pkgs.mkShell { buildInputs = build-deps ++ runtime-deps;
+           devShells.default = pkgs.mkShell { buildInputs = dev-deps ++ runtime-deps;
                                               shellHook = "${shell-hook}";
                                             };
            devShell = self.devShells.${system}.default;
