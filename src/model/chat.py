@@ -77,21 +77,29 @@ async def chat(req: ChatRequest, token: Annotated[str, Depends(scheme)]):
 async def talk(req: ChatRequest):
   msg = req.messages[0]
   member = msg.role
-  if member != 'system':
+  if member != 'assistant':
     msg.role = 'user'
   await aio.get_running_loop().create_task(db.conversation_add(msg, member, 'Courtney'))
 
   model = "gpt-4o-mini" # or "gpt-4o"
   history = await aio.get_running_loop().create_task(db.history(member))
-  prompts = [{"role": "system",
-              "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational assistant."}
+  prompts = [{ "role": "system",
+               "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational therapist."
+             },
+             { "role": "system",
+               "content": "Summarize content for a 30-year-old."
+             },
+             { "role": "system",
+               "content": "Use pronouns for content."
+             }
             ] + history + [msg]
 
+  print("### talk history=", history)
+  print("### talk prompts=", prompts)
+
   res = await post(req, prompts, model)
-  print("### talk: res=", res)
   message_res = res['choices'][0]['message']
   msg_res = Message(content=message_res['content'], role=message_res['role'])
-  print("### talk: msg_res=", msg_res)
   await aio.get_running_loop().create_task(db.conversation_add(msg_res, member, 'Courtney'))
 
   return ChatResponse(messages = [msg_res])
