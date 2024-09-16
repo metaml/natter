@@ -60,7 +60,7 @@ async def index(req: Request, response_class=HTMLResponse):
 
 @router.post("/chat")
 async def chat(req: ChatRequest, token: Annotated[str, Depends(scheme)]):
-  msgs = await aio.get_running_loop().create_task(db.history())
+  msgs = await aio.get_running_loop().create_task(db.history(member))
 
   model = "gpt-4o-mini" # or "gpt-4o"
   messages = [{"role": "system",
@@ -82,7 +82,7 @@ async def talk(req: ChatRequest):
   await aio.get_running_loop().create_task(db.conversation_add(msg, member, 'Courtney'))
 
   model = "gpt-4o-mini" # or "gpt-4o"
-  history = await aio.get_running_loop().create_task(db.history())
+  history = await aio.get_running_loop().create_task(db.history(member))
   prompts = [{"role": "system",
               "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational assistant."}
             ] + history + [msg]

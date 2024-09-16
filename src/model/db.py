@@ -6,12 +6,12 @@ import model.aws as aws
 import traceback
 
 # @todo: refactor to call credentials outside of history
-async def history():
+async def history(member: str):
   u, p, h = aws.credentials()
   recs = []
   try:
     c = await asyncpg.connect(user=u, password=p, database='aip', host=h)
-    recs = await c.fetch('select message from conversation order by created_at')
+    recs = await c.fetch("select message from conversation where member_id='" + member + "' order by created_at")
     await c.close()
   except Exception as e:
     print("exception:", e)
