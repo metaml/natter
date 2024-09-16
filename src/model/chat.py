@@ -87,7 +87,7 @@ async def talk(req: ChatRequest):
                "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational therapist."
              },
              { "role": "system",
-               "content": "Summarize content for a 30-year-old."
+              "content": "Summarize content for a 30-year-old."
              },
              { "role": "system",
                "content": "Use pronouns for content."
