@@ -9,4 +9,5 @@
 .env
 __pycache__/
 result
+static/**
 venv/**
