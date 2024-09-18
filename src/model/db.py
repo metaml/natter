@@ -1,8 +1,11 @@
+from .globals import clients
 from model.user import Member
 import asyncio
 import asyncpg
+import datetime as date
 import json
 import model.aws as aws
+import pydantic
 import traceback
 
 # @todo: refactor to call credentials outside of history
@@ -66,3 +69,17 @@ async def member_add(member: Member) -> bool:
     print(traceback.format_exc())
     return False
   return True
+
+async def prompts(member: str, friend: str = 'system'):
+  try:
+    c = await asyncpg.connect(user=clients['user-db'],
+                              password=clients['password-db'],
+                              database='aip',
+                              host=clients['host-db'],
+                             )
+    recs = await c.fetch('select prompt, member_id, friend_id from prompt where member_id=$1 and friend_id=$2', member, friend)
+    rows = [dict(rec) for rec in recs]
+    await c.close()
+    return rows
+  except Exception as e:
+    print("exception:", e)

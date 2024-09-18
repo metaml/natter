@@ -15,7 +15,7 @@ template = Jinja2Templates(directory="template")
 
 class Message(pydantic.BaseModel):
   content: str
-  role: str
+  role: str = "assistant"
 
 class ChatRequest(pydantic.BaseModel):
   messages: list[Message]
@@ -24,6 +24,18 @@ class ChatRequest(pydantic.BaseModel):
 class ChatResponse(pydantic.BaseModel):
   messages: list[Message]
   friend: str = 'Courtney'
+
+class Prompt(pydantic.BaseModel):
+  prompt: str
+  member: str
+  friend: str
+
+class PromptRequest(pydantic.BaseModel):
+  member: str
+  friend: str
+
+class PromptResponse(pydantic.BaseModel):
+  prompts: list[Prompt]
 
 async def post(req: ChatRequest, messages: list[str], model: str):
   if req.stream:
@@ -93,21 +105,24 @@ async def talk(req: ChatRequest):
 # You will talk to $Member as $Friend today.
 # Be less formal and more entertaining.
 # Change the subject. Create a story about what happened to $Friend today.
+@router.post("/prompts")
+async def prompts(req: PromptRequest):
+  ps = await aio.get_running_loop().create_task(db.prompts(req.member, req.friend))
+  print(ps)
+  return ps
 
-def prompts(member: str, friend: str, age: int) -> [str]:
-  ps = [ f"You will talk to {member} as {friend} today.",
-         f"Read {friend}’s story. Today, you have to be {friend} and talk to {member}. He is {age} years old. Be polite, and nice, tell interesting stories, and speak naturally. Be less formal, and avoid using slang words.",
-         f"Be less formal and more entertaining.",
-         f"Change the subject. Create a story about what happened to {friend} today.",
-         f"You’re chatting with {member} today, like catching up with a good friend. Share a funny story about your week.",
-         f"Keep it relaxed and fun—ask {member} about their favorite memory, and share one of yours too.",
-         f"Switch things up! Ask {friend} if anything wild or unexpected happened to them recently, and share a fun story of your own.",
-         f"Tell {friend} something funny or surprising that happened to you today, and see if they’ve had any surprises too.",
-         f"Keep it casual—ask {member} what they’ve been into lately, and share a story about something fun you did recently.",
-         f"Ask {friend} how their day is going, then tell them a lighthearted story about something that made you laugh today.",
-         f"Change things up with {member}—share something random or funny that happened to you today and ask if they’ve had any similar moments.",
-         f"You’re catching up with {friend} like old pals. Share something funny that happened today and ask if anything made them laugh recently.",
-         f"Be super casual—ask {friend} when they last had a good laugh, then tell them about something funny that happened to you today.",
-         f"start the chat with {member} by sharing something funny or random that happened today, then ask if they’ve had any surprises lately.",
-       ]
-  return map(lambda p: { "role": "system", "content": p }, ps)
+# f"You will talk to {member} as a good {friend} and therapist today.",
+# f"Be kind and empathic.",
+# f"Read {friend}’s story. Today, you have to be {friend} and talk to {member}. He is {age} years old. Be polite, and nice, tell interesting stories, and speak naturally. Be less formal, and avoid using slang words.",
+# f"Be less formal and more entertaining.",
+# f"Change the subject. Create a story about what happened to {friend} today.",
+# f"You’re chatting with {member} today, like catching up with a good friend. Share a funny story about your week.",
+# f"Keep it relaxed and fun—ask {member} about their favorite memory, and share one of yours too.",
+# f"Switch things up! Ask {friend} if anything wild or unexpected happened to them recently, and share a fun story of your own.",
+# f"Tell {friend} something funny or surprising that happened to you today, and see if they’ve had any surprises too.",
+# f"Keep it casual—ask {member} what they’ve been into lately, and share a story about something fun you did recently.",
+# f"Ask {friend} how their day is going, then tell them a lighthearted story about something that made you laugh today.",
+# f"Change things up with {member}—share something random or funny that happened to you today and ask if they’ve had any similar moments.",
+# f"You’re catching up with {friend} like old pals. Share something funny that happened today and ask if anything made them laugh recently.",
+# f"Be super casual—ask {friend} when they last had a good laugh, then tell them about something funny that happened to you today.",
+# f"start the chat with {member} by sharing something funny or random that happened today, then ask if they’ve had any surprises lately.",

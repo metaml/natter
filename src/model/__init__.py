@@ -1,4 +1,4 @@
-from .aws import openai_api_key
+from .aws import openai_api_key, credentials
 from .globals import clients
 from environs import Env
 from fastapi.middleware.cors import CORSMiddleware
@@ -16,10 +16,14 @@ async def lifespan(app: fastapi.FastAPI):
   if key == None:
     key = openai_api_key()
 
+  u, p, h = credentials()
+  clients['user-db'] = u
+  clients['password-db'] = p
+  clients['host-db'] = h
+
   client_args = {}
   client_args["api_key"] = key
   clients["openai"] = openai.AsyncOpenAI(**client_args)
-
   yield
   await clients["openai"].close()
 
