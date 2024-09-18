@@ -87,18 +87,23 @@ async def chat(req: ChatRequest, token: Annotated[str, Depends(scheme)]):
 
 @router.post("/talk")
 async def talk(req: ChatRequest):
+  print(req)
   msg = req.messages[0]
   member = msg.role
   if member != 'assistant':
     msg.role = 'user'
-  await aio.get_running_loop().create_task(db.conversation_add(msg, member, 'Courtney'))
-
-  model = "gpt-4o-mini" # or "gpt-4o"
+    await aio.get_running_loop().create_task(db.conversation_add(msg, member, 'Courtney'))
+  print(msg)
   history = await aio.get_running_loop().create_task(db.history(member))
-  res = await post(req, prompts(member, "Courtney", 32), model)
-  message_res = res['choices'][0]['message']
-  msg_res = Message(content=message_res['content'], role=message_res['role'])
-  await aio.get_running_loop().create_task(db.conversation_add(msg_res, member, 'Courtney'))
+  model = "gpt-4o" # of"gpt-4o-mini" (smaller and faster)
+  messages = [{"role": "system",
+               "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational assistant."}
+             ] + history + [msg]
+  print(messages)
+  res = await post(req, messages, model)
+  msg_res = res['choices'][0]['message']
+  message = Message(content=msg_res['content'], role=msg_res['role'])
+  await aio.get_running_loop().create_task(db.conversation_add(message, member, 'Courtney'))
 
   return ChatResponse(messages = [msg_res])
 
@@ -108,21 +113,4 @@ async def talk(req: ChatRequest):
 @router.post("/prompts")
 async def prompts(req: PromptRequest):
   ps = await aio.get_running_loop().create_task(db.prompts(req.member, req.friend))
-  print(ps)
   return ps
-
-# f"You will talk to {member} as a good {friend} and therapist today.",
-# f"Be kind and empathic.",
-# f"Read {friend}’s story. Today, you have to be {friend} and talk to {member}. He is {age} years old. Be polite, and nice, tell interesting stories, and speak naturally. Be less formal, and avoid using slang words.",
-# f"Be less formal and more entertaining.",
-# f"Change the subject. Create a story about what happened to {friend} today.",
-# f"You’re chatting with {member} today, like catching up with a good friend. Share a funny story about your week.",
-# f"Keep it relaxed and fun—ask {member} about their favorite memory, and share one of yours too.",
-# f"Switch things up! Ask {friend} if anything wild or unexpected happened to them recently, and share a fun story of your own.",
-# f"Tell {friend} something funny or surprising that happened to you today, and see if they’ve had any surprises too.",
-# f"Keep it casual—ask {member} what they’ve been into lately, and share a story about something fun you did recently.",
-# f"Ask {friend} how their day is going, then tell them a lighthearted story about something that made you laugh today.",
-# f"Change things up with {member}—share something random or funny that happened to you today and ask if they’ve had any similar moments.",
-# f"You’re catching up with {friend} like old pals. Share something funny that happened today and ask if anything made them laugh recently.",
-# f"Be super casual—ask {friend} when they last had a good laugh, then tell them about something funny that happened to you today.",
-# f"start the chat with {member} by sharing something funny or random that happened today, then ask if they’ve had any surprises lately.",
