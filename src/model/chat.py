@@ -93,30 +93,24 @@ async def talk(req: ChatRequest):
   if member != 'assistant':
     msg.role = 'user'
     await aio.get_running_loop().create_task(db.conversation_add(msg, member, 'Courtney'))
-  print(msg)
 
   history = await aio.get_running_loop().create_task(db.history(member))
-  print("### history=", history)
-  ps = await aio.get_running_loop().create_task(db.prompts(member, 'system'))
-  prompts = list(map(lambda p: { "content": p['prompt'], "role": "system" }, ps))
-  print("### prompts=", prompts)
+  prompts = await aio.get_running_loop().create_task(prompts_system(member, 'Courtney'))
 
   model = "gpt-4o" # of"gpt-4o-mini" (smaller and faster)
-  messages = [{"role": "system",
-               "content": "You are a helpful, kind, empathetic, considerate, intelligent, and rational assistant."}
-             ] + prompts + history + [msg]
-  print(messages)
+  messages = prompts + history + [msg]
   res = await post(req, messages, model)
+
   msg_res = res['choices'][0]['message']
   message = Message(content=msg_res['content'], role=msg_res['role'])
   await aio.get_running_loop().create_task(db.conversation_add(message, member, 'Courtney'))
 
   return ChatResponse(messages = [msg_res])
 
-# You will talk to $Member as $Friend today.
-# Be less formal and more entertaining.
-# Change the subject. Create a story about what happened to $Friend today.
-@router.post("/prompts")
-async def prompts(req: PromptRequest):
-  ps = await aio.get_running_loop().create_task(db.prompts(req.member, req.friend))
+async def prompts_system(member, friend):
+  ps_db = list(await aio.get_running_loop().create_task(db.prompts('system', 'system')))
+  ps = []
+  for i, p in enumerate(ps_db):
+    pn = p['prompt'].replace('{member}', member).replace('{friend}', friend)
+    ps.append({'content': pn, 'role': 'system'})
   return ps
