@@ -51,9 +51,10 @@ def app():
     allow_headers=["*"],
   )
 
-  from . import chat, user, pong
+  from . import chat, prompt, pong, user
   app.include_router(chat.router)
-  app.include_router(user.router)
   app.include_router(pong.router)
+  app.include_router(prompt.router)
+  app.include_router(user.router)
 
   return app

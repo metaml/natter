@@ -10,7 +10,7 @@ import traceback
 
 # @todo: refactor to call credentials outside of history
 async def history(member: str):
-  u, p, h = aws.credentials()
+  u, p, h = clients['user-db'], clients['password-db'], clients['host-db']
   recs = []
   try:
     c = await asyncpg.connect(user=u, password=p, database='aip', host=h)
@@ -21,7 +21,7 @@ async def history(member: str):
   return [json.loads(r[0]) for r in recs]
 
 async def conversation_add(msg, member, friend):
-  u, p, h = aws.credentials()
+  u, p, h = clients['user-db'], clients['password-db'], clients['host-db']
   if msg.role == 'assistant':
     stype = 'friend'
   else:
@@ -42,7 +42,7 @@ async def conversation_add(msg, member, friend):
     print("exception:", e)
 
 async def member(email: str) -> Member:
-  u, p, h = aws.credentials()
+  u, p, h = clients['user-db'], clients['password-db'], clients['host-db']
   recs = []
   try:
     c = await asyncpg.connect(user=u, password=p, database='aip', host=h)
@@ -70,16 +70,28 @@ async def member_add(member: Member) -> bool:
     return False
   return True
 
-async def prompts(member: str, friend: str = 'system'):
+async def prompts(member_id: str, friend_id: str = 'system'):
+  u, p, h = aws.credentials()
+  recs = None
   try:
-    c = await asyncpg.connect(user=clients['user-db'],
-                              password=clients['password-db'],
-                              database='aip',
-                              host=clients['host-db'],
-                             )
-    recs = await c.fetch('select prompt, member_id, friend_id from prompt where member_id=$1 and friend_id=$2', member, friend)
+    c = await asyncpg.connect(user=u, password=p, database='aip', host=h)
+    recs = await c.fetch('select prompt, member_id, friend_id, enabled from prompt where member_id=$1 and friend_id=$2 and enabled=$3', member_id, friend_id, True)
     rows = [dict(rec) for rec in recs]
     await c.close()
     return rows
   except Exception as e:
     print("exception:", e)
+
+async def prompts_add(prompt, member_id, friend_id, enabled) -> bool:
+  u, p, h = aws.credentials()
+  try:
+    c = await asyncpg.connect(user=u, password=p, database='aip', host=h)
+    await c.execute('''insert into prompt (prompt, member_id, friend_id, enabled)
+                                   values ($1, $2, $3, $4)''',
+                    member, member_id, friend_id, enabled
+                   )
+    await c.close()
+  except Exception:
+    print(traceback.format_exc())
+    return False
+  return True
