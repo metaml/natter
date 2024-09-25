@@ -88,7 +88,7 @@ async def prompts_add(prompt, member_id, friend_id, enabled) -> bool:
     c = await asyncpg.connect(user=u, password=p, database='aip', host=h)
     await c.execute('''insert into prompt (prompt, member_id, friend_id, enabled)
                                    values ($1, $2, $3, $4)''',
-                    member, member_id, friend_id, enabled
+                    prompt, member_id, friend_id, enabled
                    )
     await c.close()
   except Exception:
