@@ -108,9 +108,10 @@ async def talk(req: ChatRequest):
   return ChatResponse(messages = [msg_res])
 
 async def prompts_system(member, friend):
-  ps_db = list(await aio.get_running_loop().create_task(db.prompts('system', 'system')))
+  ps_sys = list(await aio.get_running_loop().create_task(db.prompts_system()))
   ps = []
-  for i, p in enumerate(ps_db):
+  for i, p in enumerate(ps_sys):
     pn = p['prompt'].replace('{member}', member).replace('{friend}', friend)
+    print('- prompt=', pn)
     ps.append({'content': pn, 'role': 'system'})
   return ps

@@ -26,7 +26,7 @@ async def conversation_add(msg, member, friend):
     stype = 'friend'
   else:
     stype = 'member'
-  print("### conversation_add: msg=", msg)
+  print("- conversation_add: msg=", msg)
   try:
     c = await asyncpg.connect(user=u, password=p, database='aip', host=h)
     await c.execute('insert into conversation (member_id, friend_id, friend_type, speaker_type, line, message) values ($1, $2, $3, $4, $5, $6)',
@@ -108,3 +108,20 @@ async def prompts_update(prompt, member_id, friend_id, enabled) -> bool:
     print(traceback.format_exc())
     return False
   return True
+
+async def prompts_system():
+  u, p, h = aws.credentials()
+  recs = None
+  try:
+    c = await asyncpg.connect(user=u, password=p, database='aip', host=h)
+    recs = await c.fetch('select prompt, member_id, friend_id, enabled from prompt where member_id=$1 and friend_id=$2 and enabled is true', 'system', 'system')
+    await c.close()
+    if recs == None:
+      print('- recs=', recs)
+      return []
+    else:
+      print('- recs=', recs)
+      rows = [dict(rec) for rec in recs]
+      return rows
+  except Exception as e:
+    print("exception:", e)

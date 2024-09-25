@@ -33,9 +33,13 @@ class PromptRes(pydantic.BaseModel):
   prompts: list[Prompt]
 
 @router.post("/prompts")
-#async def prompts(req: GetPromptsReq, token: Annotated[str, Depends(scheme)]):
 async def prompts(req: GetPromptsReq):
   ps = await aio.get_running_loop().create_task(db.prompts('system', 'system'))
+  return ps
+
+@router.post("/prompts/system")
+async def prompts(req: GetPromptsReq):
+  ps = await aio.get_running_loop().create_task(db.prompts_system('system', 'system'))
   return ps
 
 @router.post("/prompts/add")
