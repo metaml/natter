@@ -95,3 +95,16 @@ async def prompts_add(prompt, member_id, friend_id, enabled) -> bool:
     print(traceback.format_exc())
     return False
   return True
+
+async def prompts_update(prompt, member_id, friend_id, enabled) -> bool:
+  u, p, h = aws.credentials()
+  try:
+    c = await asyncpg.connect(user=u, password=p, database='aip', host=h)
+    await c.execute('''update prompt set enabled=$1 where prompt=$2 and member_id=$3 and friend_id=$4''',
+                    enabled, prompt, member_id, friend_id
+                   )
+    await c.close()
+  except Exception:
+    print(traceback.format_exc())
+    return False
+  return True

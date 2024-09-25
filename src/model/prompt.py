@@ -23,7 +23,7 @@ class GetPromptsReq(pydantic.BaseModel):
   member: str
   friend: str
 
-class AddPromptsReq(pydantic.BaseModel):
+class PromptsReq(pydantic.BaseModel):
   prompt: str
   friend_id: str
   member_id: str
@@ -39,10 +39,16 @@ async def prompts(req: GetPromptsReq):
   return ps
 
 @router.post("/prompts/add")
-#async def prompts_add(req: Prompt):
-async def prompts_add(req: AddPromptsReq):
+async def prompts_add(req: PromptsReq):
   print(req)
   b = await db.prompts_add(req.prompt, req.member_id, req.friend_id, req.enabled)
+  print(b)
+  return b
+
+@router.post("/prompts/update")
+async def prompts_update(req: PromptsReq):
+  print(req)
+  b = await db.prompts_update(req.prompt, req.member_id, req.friend_id, req.enabled)
   print(b)
   return b
 
