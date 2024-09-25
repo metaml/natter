@@ -75,7 +75,7 @@ async def prompts(member_id: str, friend_id: str = 'system'):
   recs = None
   try:
     c = await asyncpg.connect(user=u, password=p, database='aip', host=h)
-    recs = await c.fetch('select prompt, member_id, friend_id, enabled from prompt where member_id=$1 and friend_id=$2 and enabled=$3', member_id, friend_id, True)
+    recs = await c.fetch('select prompt, member_id, friend_id, enabled from prompt where member_id=$1 and friend_id=$2', member_id, friend_id)
     rows = [dict(rec) for rec in recs]
     await c.close()
     return rows
