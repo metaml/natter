@@ -5,8 +5,10 @@
 *.py[cod]
 *~
 .DS_Store
+.ami-dev-db
 .cache
 .env
+.password-db
 __pycache__/
 result
 static/**

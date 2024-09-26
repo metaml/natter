@@ -87,9 +87,8 @@ sns-test: ## test sns
 	--topic-arn arn:aws:sns:us-east-2:975050288432:aip \
 	--message file://etc/sns-test.json
 
-db-creds: export PYTHONPATH=# hack for aws
-db-creds: export PGUSER = $(shell aws secretsmanager get-secret-value --secret-id=db-user|awk '{print $$4}')
-db-creds: export PGPASSWORD = $(shell aws secretsmanager get-secret-value --secret-id=db-password|awk '{print $$4}')
+db-creds: export PGUSER := $(shell $(AWS) secretsmanager get-secret-value --secret-id=db-user|awk '{print $$4}')
+db-creds: export PGPASSWORD := $(shell $(AWS) secretsmanager get-secret-value --secret-id=db-password|awk '{print $$4}')
 db-creds: export PGHOST = aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com
 db-creds: ## save db crendentials
 	@cp /dev/null .creds \
@@ -111,6 +110,18 @@ rsync: ## rsync ami to ec2 instance
 	--rsh='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null' \
 	. ec2-3-136-167-53.us-east-2.compute.amazonaws.com:ami
 	ssh ami 'cd ami && chown -R root .'
+
+db-start: ## start dev database
+	pg_ctl -D .ami-dev-db -l /tmp/ami-dev-db.log start
+
+db-init: db-creds ## init postgresql for development
+	 @source ./.creds && echo $(PGPASSWORD) > .password-db
+	 source ./.creds \
+	 && initdb --username="$(PGUSER)" \
+		   --encoding=UTF8 \
+		   --locale=en_US.UTF-8 \
+		   --pwfile=.password-db \
+		   --pgdata=.ami-dev-db
 
 # Black        0;30     Dark Gray     1;30
 # Red          0;31     Light Red     1;31
