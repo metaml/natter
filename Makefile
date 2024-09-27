@@ -87,19 +87,6 @@ sns-test: ## test sns
 	--topic-arn arn:aws:sns:us-east-2:975050288432:aip \
 	--message file://etc/sns-test.json
 
-db-creds: export PGUSER := $(shell $(AWS) secretsmanager get-secret-value --secret-id=db-user|awk '{print $$4}')
-db-creds: export PGPASSWORD := $(shell $(AWS) secretsmanager get-secret-value --secret-id=db-password|awk '{print $$4}')
-db-creds: export PGHOST = aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com
-db-creds: ## save db crendentials
-	@cp /dev/null .creds \
-	&& echo "export PGUSER=$(PGUSER)" >> .creds  \
-	&& echo "export PGPASSWORD=$(PGPASSWORD)" >> .creds \
-	&& echo "export PGHOST=$(PGHOST)" >> .creds
-	@echo ".creds created"
-
-psql: ## connect to rds instance--"make db-creds" at least once
-	source ./.creds && psql
-
 rsync: HOST = ec2-3-136-167-53.us-east-2.compute.amazonaws.com
 rsync: ## rsync ami to ec2 instance
 	rsync --verbose \
@@ -111,17 +98,42 @@ rsync: ## rsync ami to ec2 instance
 	. ec2-3-136-167-53.us-east-2.compute.amazonaws.com:ami
 	ssh ami 'cd ami && chown -R root .'
 
-db-start: ## start dev database
-	pg_ctl -D .ami-dev-db -l /tmp/ami-dev-db.log start
+export PGHOST =# aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com
 
-db-init: db-creds ## init postgresql for development
-	 @source ./.creds && echo $(PGPASSWORD) > .password-db
-	 source ./.creds \
-	 && initdb --username="$(PGUSER)" \
-		   --encoding=UTF8 \
-		   --locale=en_US.UTF-8 \
-		   --pwfile=.password-db \
-		   --pgdata=.ami-dev-db
+db-creds: ## save db crendentials
+	cp /dev/null .creds
+	$(AWS) secretsmanager get-secret-value --secret-id=db-user | head -1 | awk '{ print "export PGUSER="$$4 }' > .creds
+	$(AWS) secretsmanager get-secret-value --secret-id=db-password | head -1 | awk '{ print "export PGPASSWORD="$$4 }' >> .creds
+	echo 'export PGHOST=' >> .creds
+	@echo ".creds created"
+
+psql-rds: ## connect to rds instance--"make db-creds" at least once
+	source ./.creds && psql --host=aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com
+
+psql: ## connect to rds instance--"make db-creds" at least once
+	source ./.creds && psql
+
+db-start: ## start dev database
+	pg_ctl --pgdata=.ami-dev-db --log=/tmp/ami-dev-db.log start
+
+db-stop: ## start dev database
+	pg_ctl --pgdata=.ami-dev-db stop
+
+db-init: ## init postgresql for development
+	source ./.creds && \
+	initdb --username="$${PGUSER}" \
+	        --encoding=UTF8 \
+	        --locale=en_US.UTF-8 \
+	        --pwfile=.password-db \
+	        --pgdata=.ami-dev-db
+
+db-create:
+	source ./.creds && \
+	createdb aip --template=template0 \
+		     --owner=aip \
+		     --username="$(PGUSER)" \
+		     --encoding=UTF8 \
+		     --locale=en_US.UTF-8
 
 # Black        0;30     Dark Gray     1;30
 # Red          0;31     Light Red     1;31
