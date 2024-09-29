@@ -10,6 +10,9 @@ import logging
 import openai
 import os
 
+# only when MODE == 'DEV' is for development otherwise it's production
+# all MODE = 'DEV" parameters are set here
+
 @contextlib.asynccontextmanager
 async def lifespan(app: fastapi.FastAPI):
   key = os.getenv("OPENAI_API_KEY")
@@ -17,9 +20,17 @@ async def lifespan(app: fastapi.FastAPI):
     key = openai_api_key()
 
   u, p, h = credentials()
-  clients['user-db'] = u
   clients['password-db'] = p
-  clients['host-db'] = h
+  if os.getenv('MODE') == 'DEV':
+    clients['user-db'] = 'aip-dev'
+    clients['password-db'] = p
+    clients['host-db'] = 'localhost'
+    clients['db'] = 'aip-dev'
+  else:
+    clients['user-db'] = u
+    clients['password-db'] = p
+    clients['host-db'] = h
+    clients['db'] = 'aip'
 
   client_args = {}
   client_args["api_key"] = key

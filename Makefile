@@ -7,7 +7,7 @@ run: export AWS_DEFAULT_REGION = us-east-2
 run: ## run ami, rest server
 	./app/ami.py
 
-run-dev: export DEV_AMI = 1
+run-dev: export MODE = DEV
 run-dev: ## run aip, rest server in dev mode
 	uvicorn aip:aip --reload
 
@@ -102,7 +102,7 @@ export PGHOST =# aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com
 
 db-creds: ## save db crendentials
 	cp /dev/null .creds
-	$(AWS) secretsmanager get-secret-value --secret-id=db-user | head -1 | awk '{ print "export PGUSER="$$4 }' > .creds
+	echo 'export PGUSER=aip-dev' > .creds
 	$(AWS) secretsmanager get-secret-value --secret-id=db-password | head -1 | awk '{ print "export PGPASSWORD="$$4 }' >> .creds
 	echo 'export PGHOST=' >> .creds
 	@echo ".creds created"
@@ -129,11 +129,11 @@ db-init: ## init postgresql for development
 
 db-create:
 	source ./.creds && \
-	createdb aip --template=template0 \
-		     --owner=aip \
-		     --username="$(PGUSER)" \
-		     --encoding=UTF8 \
-		     --locale=en_US.UTF-8
+	createdb aip-dev --template=template0 \
+			 --owner=$(PGUSER) \
+			 --username="$(PGUSER)" \
+			 --encoding=UTF8 \
+			 --locale=en_US.UTF-8
 
 # Black        0;30     Dark Gray     1;30
 # Red          0;31     Light Red     1;31
