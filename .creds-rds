@@ -1,0 +1,3 @@
+export PGUSER=aip
+export PGPASSWORD=55b5468a801f27ae729fd9eeac84c187
+export PGHOST=aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com

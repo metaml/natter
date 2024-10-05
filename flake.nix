@@ -85,7 +85,7 @@
 
         # docker image
         packages.docker = pkgs.dockerTools.buildImage {
-          inherit name;
+          name = "ami-lambda";
           tag = "latest";
           created = "now";
           copyToRoot = pkgs.buildEnv {

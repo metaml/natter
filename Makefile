@@ -60,16 +60,16 @@ login-aws: ## login to aws to fetch/refresh token
 image-push: REGION = us-east-2
 image-push: DOCKER_LOGIN = $(shell $(AWS) ecr get-login-password --region $(REGION))
 image-push: ## * push image to ecr *
-	docker tag ami-rest:latest $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/ami-rest:latest
+	docker tag ami-lambda:latest $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/ami-lambda:latest
 	$(AWS) ecr get-login-password --region $(REGION) \
 	| docker login --username AWS --password-stdin $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com
-	docker push $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/ami-rest:latest
+	docker push $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/ami-lambda:latest
 
 image-load: ## load docker image
 	docker load < result
 
 image-run: ## run the image
-	docker run --platform linux/am64 --interactive --tty --rm ami-rest
+	docker run --platform linux/am64 --interactive --tty --rm ami-lambda
 
 image-clean: ## remove images
 	docker system prune -a --volumes
@@ -84,8 +84,13 @@ api-test: ## test openai api
 sns-test: export PYTHONPATH=#
 sns-test: ## test sns
 	aws sns publish \
-	--topic-arn arn:aws:sns:us-east-2:975050288432:aip \
+	--topic-arn "arn:aws:sns:us-east-2:975050288432:aip" \
 	--message file://etc/sns-test.json
+
+# sns-publish: ## publish a message to the aip sns-topic
+# 	aws sns publish \
+# 	--topic-arn "arn:aws:sns:us-east-2:975050288432:aip" \
+# 	--message file://etc/msg.json
 
 rsync: HOST = ec2-3-136-167-53.us-east-2.compute.amazonaws.com
 rsync: ## rsync ami to ec2 instance
@@ -100,15 +105,23 @@ rsync: ## rsync ami to ec2 instance
 
 export PGHOST =# aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com
 
-db-creds: ## save db crendentials
+db-creds: ## save dev db crendentials
 	cp /dev/null .creds
 	echo 'export PGUSER=aip-dev' > .creds
 	$(AWS) secretsmanager get-secret-value --secret-id=db-password | head -1 | awk '{ print "export PGPASSWORD="$$4 }' >> .creds
 	echo 'export PGHOST=' >> .creds
 	@echo ".creds created"
 
+db-creds-rds: ## save rds db crendentials
+	cp /dev/null .creds-rds
+	$(AWS) secretsmanager get-secret-value --secret-id=db-user | head -1 | awk '{ print "export PGUSER="$$4 }' >> .creds-rds
+	$(AWS) secretsmanager get-secret-value --secret-id=db-password | head -1 | awk '{ print "export PGPASSWORD="$$4 }' >> .creds-rds
+	echo 'export PGHOST=aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com' >> .creds-rds
+	@echo ".creds-rds created"
+
+
 psql-rds: ## connect to rds instance--"make db-creds" at least once
-	source ./.creds && psql --host=aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com
+	source ./.creds-rds && psql
 
 psql: ## connect to rds instance--"make db-creds" at least once
 	source ./.creds && psql

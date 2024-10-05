@@ -59,8 +59,10 @@ async def post(req: ChatRequest, messages: list[str], model: str):
 # @todo: implement using async
 async def publish(msgs: list[Message]) -> str:
   last_msg = None
+  print('--------msgs=', msgs)
   for msg in msgs:
     last_msg = msg
+    print('--------msg=', msg)
     aws.publish_aip(msg)
   return last_msg
 
@@ -99,9 +101,14 @@ async def talk(req: ChatRequest):
 
   model = "gpt-4o" # of"gpt-4o-mini" (smaller and faster)
   messages = prompts + history + [msg]
-  res = await post(req, messages, model)
 
-  msg_res = res['choices'][0]['message']
+  res_post = await post(req, messages, model)
+  print('========res_post==', res_post)
+
+  res_pub = await publish(req.messages)
+  print('========res_pub==', res_pub)
+
+  msg_res = res_post['choices'][0]['message']
   message = Message(content=msg_res['content'], role=msg_res['role'])
   await aio.get_running_loop().create_task(db.conversation_add(message, member, 'Courtney'))
 

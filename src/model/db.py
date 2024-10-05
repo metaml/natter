@@ -29,15 +29,16 @@ async def conversation_add(msg, member, friend):
   print("- conversation_add: msg=", msg)
   try:
     c = await asyncpg.connect(user=u, password=p, database=db, host=h)
-    await c.execute('''insert into conversation (member_id, friend_id, friend_type, speaker_type, line, message)
-                                   values ($1, $2, $3, $4, $5, $6)
+    await c.execute('''insert into conversation (member_id, friend_id, friend_type, speaker_type, line, message, message_state)
+                                   values ($1, $2, $3, $4, $5, $6, $7)
                        on conflict do nothing''',
                     member,
                     friend,
                     'human',
                     stype,
                     msg.content,
-                    json.dumps(msg.__dict__)
+                    json.dumps(msg.__dict__),
+                    'itm'
                    )
     await c.close()
   except Exception as e:
