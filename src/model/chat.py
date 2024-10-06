@@ -16,6 +16,8 @@ template = Jinja2Templates(directory="template")
 class Message(pydantic.BaseModel):
   content: str
   role: str = "assistant"
+  member: str = ""
+  friend: str = ""
 
 class ChatRequest(pydantic.BaseModel):
   messages: list[Message]
@@ -59,11 +61,11 @@ async def post(req: ChatRequest, messages: list[str], model: str):
 # @todo: implement using async
 async def publish(msgs: list[Message]) -> str:
   last_msg = None
-  print('--------msgs=', msgs)
+  print('######## msgs=', msgs)
   for msg in msgs:
-    last_msg = msg
-    print('--------msg=', msg)
     aws.publish_aip(msg)
+    print('######## msg=', msg)
+    last_msg = msg
   return last_msg
 
 @router.get("/home")
@@ -89,30 +91,32 @@ async def chat(req: ChatRequest, token: Annotated[str, Depends(scheme)]):
 
 @router.post("/talk")
 async def talk(req: ChatRequest):
-  print(req)
+  print("****req****:", req)
   msg = req.messages[0]
-  member = msg.role
-  if member != 'assistant':
-    msg.role = 'user'
-    await aio.get_running_loop().create_task(db.conversation_add(msg, member, 'Courtney'))
 
-  history = await aio.get_running_loop().create_task(db.history(member))
-  prompts = await aio.get_running_loop().create_task(prompts_system(member, 'Courtney'))
+  history = await aio.get_running_loop().create_task(db.history(msg.member))
+  prompts = await aio.get_running_loop().create_task(prompts_system(msg.member, msg.friend))
 
+  # publish
   model = "gpt-4o" # of"gpt-4o-mini" (smaller and faster)
   messages = prompts + history + [msg]
-
   res_post = await post(req, messages, model)
-  print('========res_post==', res_post)
-
+  print('res_post=', res_post)
   res_pub = await publish(req.messages)
-  print('========res_pub==', res_pub)
+  print('res_pub=', res_pub)
 
-  msg_res = res_post['choices'][0]['message']
-  message = Message(content=msg_res['content'], role=msg_res['role'])
-  await aio.get_running_loop().create_task(db.conversation_add(message, member, 'Courtney'))
+  # publish
+  message = res_post['choices'][0]['message']
+  print("######## message=", message)
+  message_pub = Message( content = message['content'],
+                         role =  message['role'],
+                         member =  res_pub.member,
+                         friend = res_pub.friend
+                       )
+  res_pub2 = await publish([message_pub])
+  print("res_pub2=", res_pub2)
 
-  return ChatResponse(messages = [msg_res])
+  return ChatResponse(messages = [message])
 
 async def prompts_system(member, friend):
   ps_sys = list(await aio.get_running_loop().create_task(db.prompts_system()))

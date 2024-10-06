@@ -1,32 +1,47 @@
+from model.chat import Message
 import boto3
 import json
 import model.aws as aws
-import model.chat as chat
+import pydantic
 
 def openai_api_key() -> str:
   c = boto3.client('secretsmanager')
-  return c.get_secret_value(SecretId='openai-api-key')['SecretString']
+  s = c.get_secret_value(SecretId='openai-api-key')['SecretString']
+  c.close()
+  return s
 
-def publish_aip(msg: chat.Message) -> str:
-  aip_arn = "arn:aws:sns:us-east-2:975050288432:aip"
-  return publish(msg, aip_arn)
+def publish_aip(msg: Message) -> str:
+  return publish(msg, "arn:aws:sns:us-east-2:975050288432:aip")
 
-def publish(msg: chat.Message, arn: str, msg_struct: str='json') -> str:
-  # my goodness! what a stupid API!
-  msg_json = {'default': msg.json()}
+def publish(msg: Message, arn: str) -> str:
+  default = json.dumps({ "default": msg.json() })
+  #default_json = json.dumps(default)
   c = boto3.client("sns")
-  print('######## publish: msg_json=', msg_json)
-  return c.publish(Message=json.dumps(msg_json),
-                   MessageStructure=msg_struct,
-                   TopicArn=arn,
-                   Subject='ITM'
-                  )['MessageId']
+  r = c.publish(Message=default,
+                MessageStructure='json',
+                TopicArn='arn:aws:sns:us-east-2:975050288432:aip',
+                Subject='itm'
+               )['MessageId']
+  c.close()
+  return r
+
+def publish_sns(msg_json) -> str:
+  c = boto3.client("sns")
+  r = c.publish(Message=msg_json,
+                MessageStructure='json',
+                TopicArn='arn:aws:sns:us-east-2:975050288432:aip',
+                Subject='itm'
+                )['MessageId']
+  c.close()
+  return r
 
 def credentials():
   sec = boto3.client(service_name='secretsmanager', region_name='us-east-2')
   u = user(sec)
   p = passwd(sec)
-  return u['SecretString'], p['SecretString'], "aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com"
+  c = u['SecretString'], p['SecretString'], "aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com"
+  sec.close()
+  return c
 
 def user(sec):
   return sec.get_secret_value(SecretId='db-user')
