@@ -94,7 +94,10 @@ async def talk(req: ChatRequest):
   print("****req****:", req)
   msg = req.messages[0]
 
+  print("######## talk msg=", msg)
   history = await aio.get_running_loop().create_task(db.history(msg.member))
+  print("######## talk history=", history)
+
   prompts = await aio.get_running_loop().create_task(prompts_system(msg.member, msg.friend))
 
   # publish
