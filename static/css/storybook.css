@@ -23,7 +23,7 @@
 .Storybook-nav {
   grid-area: nav;
   overflow-y: auto;
-  font-size: 0.875rem;
+  font-size: 1rem;
   background-color: #fafafa;
   border-right: 1px solid rgba(0, 0, 0, 0.08);
 }

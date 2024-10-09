@@ -19,27 +19,35 @@ class Message(pydantic.BaseModel):
   member: str = ""
   friend: str = ""
 
-class ChatRequest(pydantic.BaseModel):
+class ChatReq(pydantic.BaseModel):
   messages: list[Message]
   stream: bool = False
 
-class ChatResponse(pydantic.BaseModel):
+class ChatRes(pydantic.BaseModel):
   messages: list[Message]
   friend: str = 'Courtney'
+
+class MessageReq(pydantic.BaseModel):
+   member: str
+   friend: str
+
+class MessageRes(pydantic.BaseModel):
+  name: str
+  message: str
 
 class Prompt(pydantic.BaseModel):
   prompt: str
   member: str
   friend: str
 
-class PromptRequest(pydantic.BaseModel):
+class PromptReq(pydantic.BaseModel):
   member: str
   friend: str
 
-class PromptResponse(pydantic.BaseModel):
+class PromptRes(pydantic.BaseModel):
   prompts: list[Prompt]
 
-async def post(req: ChatRequest, messages: list[str], model: str):
+async def post(req: ChatReq, messages: list[str], model: str):
   if req.stream:
     async def res_stream():
       chat_coroutine = clients["openai"].chat.completions.create(
@@ -61,10 +69,8 @@ async def post(req: ChatRequest, messages: list[str], model: str):
 # @todo: implement using async
 async def publish(msgs: list[Message]) -> str:
   last_msg = None
-  print('######## msgs=', msgs)
   for msg in msgs:
     aws.publish_aip(msg)
-    print('######## msg=', msg)
     last_msg = msg
   return last_msg
 
@@ -75,7 +81,7 @@ async def index(req: Request, response_class=HTMLResponse):
   )
 
 @router.post("/chat")
-async def chat(req: ChatRequest, token: Annotated[str, Depends(scheme)]):
+async def chat(req: ChatReq, token: Annotated[str, Depends(scheme)]):
   msgs = await aio.get_running_loop().create_task(db.history(member))
 
   model = "gpt-4o-mini" # or "gpt-4o"
@@ -90,16 +96,13 @@ async def chat(req: ChatRequest, token: Annotated[str, Depends(scheme)]):
   return res[0]
 
 @router.post("/talk")
-async def talk(req: ChatRequest):
-  print("****req****:", req)
+async def talk(req: ChatReq):
   msg = req.messages[0]
 
-  print("######## talk msg=", msg)
-  history = await aio.get_running_loop().create_task(db.history(msg.member))
-  print("######## talk history=", history)
-
+  history = await aio.get_running_loop().create_task(db.history(msg.member, msg.friend))
+  print("######## history=", history)
   prompts = await aio.get_running_loop().create_task(prompts_system(msg.member, msg.friend))
-
+  print("######## prompts=", prompts)
   # publish
   model = "gpt-4o" # of"gpt-4o-mini" (smaller and faster)
   messages = prompts + history + [msg]
@@ -119,7 +122,17 @@ async def talk(req: ChatRequest):
   res_pub2 = await publish([message_pub])
   print("res_pub2=", res_pub2)
 
-  return ChatResponse(messages = [message])
+  return ChatRes(messages = [message])
+
+@router.post("/messages")
+async def messages(req: MessageReq):
+  def to_res(msg):
+    if msg['role'] == 'user':
+      return { 'name': req.member, 'message': msg['content']}
+    else: # role -> 'assistant'
+      return { 'name': req.friend, 'message': msg['content']}
+  msgs = await aio.get_running_loop().create_task(db.history(req.member, req.friend, 13))
+  return list(map(to_res, msgs))
 
 async def prompts_system(member, friend):
   ps_sys = list(await aio.get_running_loop().create_task(db.prompts_system()))

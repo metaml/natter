@@ -3,7 +3,6 @@ from typing import Annotated
 import asyncio as aio
 import json
 import model.aws as aws
-import model.db as db
 import os
 import pydantic
 

@@ -9,12 +9,13 @@ import pydantic
 import traceback
 
 # @todo: refactor to call credentials outside of history
-async def history(member: str):
+async def history(member: str, friend: str, n: int = 21):
   u, p, h, db = clients['user-db'], clients['password-db'], clients['host-db'], clients['db']
   recs = []
   try:
     c = await asyncpg.connect(user=u, password=p, database=db, host=h)
-    recs = await c.fetch("select message from conversation where member_id='" + member + "' order by created_at")
+    recs = await c.fetch(f"select message from conversation where member_id=$1 and friend_id=$2 order by created_at limit {n} offset greatest((select count(1) from conversation where member_id=$1 and friend_id=$2) - {n}, 0)",
+                         member, friend)
     await c.close()
   except Exception as e:
     print("exception:", e)

@@ -1,13 +1,13 @@
 :root {
-  --font-size: 18px;
+  --font-size: 12px;
 }
 
 body {
   font-family: sans-serif;
 }
 
-article {
-  max-width: 800px;
+textarea {
+  max-width: auto;
   margin-right: auto;
   margin-left: auto;
 }
