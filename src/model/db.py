@@ -9,7 +9,7 @@ import pydantic
 import traceback
 
 # @todo: refactor to call credentials outside of history
-async def history(member: str, friend: str, n: int = 21):
+async def history(member: str, friend: str, n: int = 34):
   u, p, h, db = clients['user-db'], clients['password-db'], clients['host-db'], clients['db']
   recs = []
   try:
@@ -19,6 +19,7 @@ async def history(member: str, friend: str, n: int = 21):
     await c.close()
   except Exception as e:
     print("exception:", e)
+  print("######## history=", recs)
   return [json.loads(r[0]) for r in recs]
 
 async def conversation_add(msg, member, friend):
