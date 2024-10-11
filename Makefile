@@ -9,7 +9,7 @@ run: ## run ami, rest server
 
 run-dev: export MODE = DEV
 run-dev: ## run aip, rest server in dev mode
-	uvicorn aip:aip --reload
+	./app/ami.py
 
 # nix build --debug --verbose -L .#dist-files
 build: ## build python package
@@ -24,6 +24,12 @@ image: ## docker image
 
 install: ## @ install ami flake @
 	nix profile install #ami
+
+install-app: ## install javascript client
+	rsync --delete --archive static/ /static/
+
+install-cert: ## install self-signed ssl cert
+	cp -f etc/*.pem /etc
 
 remove: ## @ remove ami flake @
 	nix profile remove #ami
@@ -147,6 +153,9 @@ db-create:
 			 --username="$(PGUSER)" \
 			 --encoding=UTF8 \
 			 --locale=en_US.UTF-8
+
+ssl-cert: ## create a self signed cert for SSL
+	openssl req -x509 -newkey rsa:4096 -nodes -out etc/cert.pem -keyout etc/key.pem -days 3650
 
 # Black        0;30     Dark Gray     1;30
 # Red          0;31     Light Red     1;31

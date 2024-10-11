@@ -17,6 +17,7 @@
                               python
                               python-pkgs.asyncpg
                               python-pkgs.boto3
+                              python-pkgs.cryptography
                               python-pkgs.environs
                               python-pkgs.fastapi
                               python-pkgs.gradio

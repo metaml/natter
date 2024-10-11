@@ -8,10 +8,18 @@ import sys
 
 if __name__ == '__main__':
   os.environ['AWS_DEFAULT_REGION'] = 'us-east-2'
-  port, log = 8000, "info"
+  ip, port, key, cert = "0.0.0.0", 8000, "etc/key.pem", "etc/cert.pem"
   try:
-    arg = shlex.split(f"uvicorn aip:aip --workers 8 --host 0.0.0.0 --port {port} --log-level {log}")
-    res = subproc.run(arg, text=True)
-  except Excepton as e:
+   uvicorn = None
+   if not os.getenv("MODE"): # prod
+     key = f"/{key}"
+     cert = f"/{cert}"
+     uvicorn = f"uvicorn aip:aip --workers 8 --host {ip} --port {port} --ssl-keyfile {key} --ssl-certfile {cert}"
+   else: # dev
+     uvicorn = f"uvicorn aip:aip --reload --host {ip} --port {port}  --ssl-keyfile {key} --ssl-certfile {cert}"
+
+   arg = shlex.split(uvicorn)
+   res = subproc.run(arg, text=True)
+  except Exception as e:
     print("exception: ", e, file=sys.stderr)
     sys.exit(0)

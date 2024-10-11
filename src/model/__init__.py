@@ -9,6 +9,7 @@ import fastapi
 import logging
 import openai
 import os
+import ssl
 
 # only when MODE == 'DEV' is for development otherwise it's production
 # all MODE = 'DEV" parameters are set here
@@ -35,19 +36,24 @@ async def lifespan(app: fastapi.FastAPI):
   client_args = {}
   client_args["api_key"] = key
   clients["openai"] = openai.AsyncOpenAI(**client_args)
+
+  # @todo: run uvicore all within a pthyon app
+  # ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+  # ssl_context.load_cert_chain('etc/cert.pem', keyfile='etc/key.pem')
+  # clients['ssl_context'] = ssl_context
+
   yield
   await clients["openai"].close()
 
 def app():
-  if not os.getenv("DEV_AMI"):
-    logging.basicConfig(level=logging.DEBUG)
-  else:
+  if not os.getenv("MODE"): # prod
     logging.basicConfig(level=logging.INFO)
+  else:
+    logging.basicConfig(level=logging.DEBUG)
 
-  origins = Env().list("ALLOWED_ORIGINS", [ "http://alb-1952262379.us-east-2.elb.amazonaws.com",
-                                            "http://alb-1952262379.us-east-2.elb.amazonaws.com:8000",
-                                            "http://localhost",
-                                            "https://localhost:8000",
+  origins = Env().list("ALLOWED_ORIGINS", [ "https://alb-64c71258f6c9e59f.elb.us-east-2.amazonaws.com",
+                                            "https://alb-64c71258f6c9e59f.elb.us-east-2.amazonaws.com:8000",
+                                            "https://localhost:8000"
                                           ]
                       )
   app = fastapi.FastAPI(docs_url="/", lifespan=lifespan)
