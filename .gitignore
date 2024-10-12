@@ -11,5 +11,5 @@
 .password-db
 __pycache__/
 result
-static/**
+static/index.js
 venv/**
