@@ -55,7 +55,7 @@
             export LANG=en_US.UTF-8
             export PIP_PREFIX=$(pwd)/venv/pypi
             export PYTHONPATH=$(pwd)/src:$PIP_PREFIX/${python.sitePackages}:$PYTHONPATH
-            export PATH=$(pwd)/app:$PIP_PREFIX/bin/$PATH
+            export PATH=$(pwd)/app:$PIP_PREFIX/bin:$PATH
             unset SOURCE_DATE_EPOCH
             export PS1="ami|$PS1"
             # awscli2 and openai have a dependency conflict
