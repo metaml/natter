@@ -2,6 +2,7 @@
 **/.#*
 **/.creds
 **/*.ipynb
+**/*.openai-api-key
 *.py[cod]
 *~
 .DS_Store

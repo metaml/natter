@@ -125,6 +125,9 @@ db-creds-rds: ## save rds db crendentials
 	echo 'export PGHOST=aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com' >> .creds-rds
 	@echo ".creds-rds created"
 
+openai-api-key: ## save openai api key
+	cp /dev/null .openai-api-key
+	$(AWS) secretsmanager get-secret-value --secret-id=openai-api-key | head -1 | awk '{ print "export OPENAI_API_KEY="$$4 }' >> .openai-api-key
 
 psql-rds: ## connect to rds instance--"make db-creds" at least once
 	source ./.creds-rds && psql
