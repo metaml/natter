@@ -100,7 +100,9 @@ sns-test: ## test sns
 
 rsync: HOST = ec2-3-136-167-53.us-east-2.compute.amazonaws.com
 rsync: ## rsync ami to ec2 instance
-	rsync --verbose \
+	rsync \
+	--exclude venv \
+	--verbose \
 	--archive \
 	--compress \
 	--delete \
@@ -127,7 +129,7 @@ db-creds-rds: ## save rds db crendentials
 
 openai-api-key: ## save openai api key
 	cp /dev/null .openai-api-key
-	$(AWS) secretsmanager get-secret-value --secret-id=openai-api-key | head -1 | awk '{ print "export OPENAI_API_KEY="$$4 }' >> .openai-api-key
+	$(AWS) secretsmanager get-secret-value --secret-id=openai-api-key | jq -r '.SecretString' | awk '{ print "export OPENAI_API_KEY="$$1 }' >> .openai-api-key
 
 psql-rds: ## connect to rds instance--"make db-creds" at least once
 	source ./.creds-rds && psql

@@ -6,8 +6,8 @@ import json
 import requests as req
 import sys
 
-#url = 'http://alb-1952262379.us-east-2.elb.amazonaws.com/talk'
-url = 'http://localhost:8000/talk'
+url = 'https://alb-1952262379.us-east-2.elb.amazonaws.com/talk'
+#url = 'http://localhost:8000/talk'
 
 while True:
   msgin = input(colored("member> ", "green"))

@@ -27,11 +27,13 @@
                               python-pkgs.environs
                               python-pkgs.fastapi
                               python-pkgs.jinja2
+                              python-pkgs.numpy
                               python-pkgs.openai
                               python-pkgs.passlib
                               python-pkgs.pip
                               python-pkgs.pydantic-core
                               python-pkgs.pyjwt
+                              python-pkgs.setuptools
                               python-pkgs.termcolor
                               python-pkgs.uvicorn
                               python-pkgs.virtualenv
@@ -42,14 +44,16 @@
                                   gnumake
                                   jq
                                   postgresql_16
-                                  python-pkgs.setuptools
                                 ];
-          dev-clang-deps = with pkgs; [ llvm-pkgs.clang
-                                        llvm-pkgs.clang-tools
-                                        llvm-pkgs.libcxx
-                                        llvm-pkgs.libstdcxxClang
-                                        llvm-pkgs.stdenv
-                                      ];
+          # cc-deps = with llvm-pkgs; [ clang
+          #                             clang-tools
+          #                             libcxx
+          #                             libstdcxxClang
+          #                             pkgs.stdenv.cc.cc.lib
+          #                           ];
+          cc-deps = with pkgs; [ gcc14Stdenv
+                                 gcc-unwrapped.lib
+                               ];
 
           shell-hook = ''
             export LANG=en_US.UTF-8
@@ -62,7 +66,8 @@
             [ ! -f .creds ] || source .creds
             alias aws='PYTHONPATH= aws'
             python -m venv ./venv
-            . ./venv/bin/activate
+            source ./venv/bin/activate
+            pip install --requirement=requirements.txt
           '';
       in { # runtime environment
         packages.default = python.pkgs.buildPythonApplication rec {
@@ -71,9 +76,9 @@
           src     = self;
           format  = "other";
           doCheck = false;
-          propagatedBuildInputs = runtime-deps;
+          propagatedBuildInputs = runtime-deps ++ cc-deps;
           # nb: odd behaviour in that nix build seems to introspect the string below
-          installPhase = "mkdir -p $out/bin; cp -p app/ami.py $out/bin/ami.py; cp -ap src $out/lib";
+          installPhase = "mkdir -p $out/bin && cp -p app/ami.py $out/bin/ami.py && cp -p app/letta $out/bin/letta.sh && cp -ap src $out/lib";
           postFixup = "wrapProgram $out/bin/ami.py --prefix PYTHONPATH : $out/lib --prefix PYTHONPATH : $PYTHONPATH  --prefix PATH : ${python}/bin";
         };
         defaultPackage = self.packages.${system}.default;
@@ -97,6 +102,22 @@
             activate = "$PROFILE/bin/activate";
           };
         };
+        deploy.nodes.letta = {
+          hostname = "localhost";
+          profiles.letta = {
+            path = systemd.lib.${system}.mkSystemService "letta" {
+              path = deploy.lib.${system}.setActivate nixpkgs.legacyPackages.${system}.ami "./bin/letta.sh";
+              serviceConfig = {
+                ExecStart = "python -m venv ./venv && source ./venv/bin/activate && letta server";
+                Restart   = "always";
+                Killmode  = "mixed";
+              };
+              description = "letta rest service";
+            };
+            activate = "$PROFILE/bin/activate";
+          };
+        };
+
 
         # docker image
         packages.docker = pkgs.dockerTools.buildImage {
@@ -117,8 +138,9 @@
         };
 
         # dev environment
-        devShells.default = pkgs.mkShell.override { stdenv = pkgs.clangStdenv; } rec {
-          packages = dev-deps ++ dev-clang-deps ++ runtime-deps;
+        devShells.default = pkgs.mkShell.override { stdenv = pkgs.gcc14Stdenv; } rec {
+          LD_LIBRARY_PATH = "$LD_LIBRARY_PATH:${pkgs.stdenv.cc.cc.lib}/lib";
+          packages = dev-deps ++ cc-deps ++ runtime-deps;
           shellHook = "${shell-hook}";
         };
         devShell = self.devShells.${system}.default;
