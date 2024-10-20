@@ -16,6 +16,7 @@ if __name__ == '__main__':
      cert = f"/{cert}"
      uvicorn = f"uvicorn aip:aip --workers 8 --host {ip} --port {port} --ssl-keyfile {key} --ssl-certfile {cert}"
    else: # dev
+     #uvicorn = f"uvicorn aip:aip --reload --host {ip} --port {port}"
      uvicorn = f"uvicorn aip:aip --reload --host {ip} --port {port}  --ssl-keyfile {key} --ssl-certfile {cert}"
 
    arg = shlex.split(uvicorn)

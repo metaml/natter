@@ -13,7 +13,7 @@ while True:
   msgin = input(colored("member> ", "green"))
   if msgin.lower() == "quit":
     break
-  chat_req = ChatRequest(messages = [Message(content=msgin, role="Mike"), ], stream = False)
+  chat_req = ChatRequest(messages = [Message(content=msgin, role="User"), ], stream = False)
   res = req.post(url, data=chat_req.model_dump_json()).json()
   msg = res['messages'][0]['content']
   print(colored("friend>", "cyan"), msg)

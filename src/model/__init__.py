@@ -4,6 +4,7 @@ from environs import Env
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
+from letta import create_client
 import contextlib
 import fastapi
 import logging
@@ -34,8 +35,10 @@ async def lifespan(app: fastapi.FastAPI):
     clients['db'] = 'aip'
 
   client_args = {}
-  client_args["api_key"] = key
-  clients["openai"] = openai.AsyncOpenAI(**client_args)
+  client_args['api_key'] = key
+  clients['openai'] = openai.AsyncOpenAI(**client_args)
+
+  clients['letta'] = create_client(base_url="http://localhost:8283")
 
   # @todo: run uvicore all within a pthyon app
   # ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
@@ -68,8 +71,9 @@ def app():
     allow_headers=["*"],
   )
 
-  from . import chat, prompt, pong, user
+  from . import chat, letta, pong, prompt, user
   app.include_router(chat.router)
+  app.include_router(letta.router)
   app.include_router(pong.router)
   app.include_router(prompt.router)
   app.include_router(user.router)

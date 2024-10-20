@@ -135,6 +135,9 @@ psql-rds: ## connect to rds instance--"make db-creds" at least once
 psql: ## connect to rds instance--"make db-creds" at least once
 	source ./.creds && psql
 
+letta-start: ## start letta server
+	letta server --debug
+
 db-start: ## start dev database
 	pg_ctl --pgdata=.ami-dev-db --log=/tmp/ami-dev-db.log start
 
