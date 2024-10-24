@@ -23,13 +23,22 @@ image: ## docker image
 	nix build --impure --verbose --option sandbox relaxed .#docker
 
 install: ## @ install ami flake @
-	nix profile install #ami
+	nix profile install
 
 install-app: ## install javascript client
 	rsync --delete --archive static/ /static/
 
 install-cert: ## install self-signed ssl cert
 	cp -f etc/*.pem /etc
+
+install-venv: create-venv ## create venv environment
+	pip install -r requirements.txt
+
+create-venv: ## create initial venv environment
+	virtualenv venv
+
+install-letta: ## install letta
+	venv-pack -o letta.zip
 
 remove: ## @ remove ami flake @
 	nix profile remove #ami
@@ -43,6 +52,8 @@ clobber: clean ## clobber dev env
 dev: ## @ nix develop @
 	nix develop --impure
 
+dev-trace: ## @ nix develop @
+	nix develop --impure --show-trace
 help: BLU = \033[1;34m
 help: CYA = \033[1;36m
 help: GRN = \033[1;32m
