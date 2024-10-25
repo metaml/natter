@@ -78,9 +78,9 @@
             mkdir -p $out/bin
             cp -p app/ami.py $out/bin/ami.py
             cp -ap src $out/lib
-            cp -ap lib $out/
+            cp -ap venv $out/
           '';
-          postFixup = "wrapProgram $out/bin/ami.py --prefix PYTHONPATH : $out/lib  --prefix PYTHONPATH : $out/lib/lib/python3.12/site-packages --prefix PYTHONPATH : $PYTHONPATH --prefix PATH : ${python}/bin --prefix PATH : $out/lib/bin";
+          postFixup = "wrapProgram $out/bin/ami.py --prefix PYTHONPATH : $out/venv  --prefix PYTHONPATH : $out/venv/lib/python3.12/site-packages --prefix PYTHONPATH : $PYTHONPATH --prefix PATH : ${python}/bin --prefix PATH : $out/venv/bin";
         };
         defaultPackage = self.packages.${system}.default;
 
