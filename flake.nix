@@ -58,9 +58,8 @@
                                ];
           shell-hook = ''
             export LANG=en_US.UTF-8
-            export PIP_PREFIX=$(pwd)/venv
-            export PYTHONPATH=$(pwd)/src:$PIP_PREFIX/${python.sitePackages}:$PYTHONPATH
-            export PATH=$(pwd)/app:$PIP_PREFIX/bin:$PATH
+            export PATH=$(pwd)/app:$(pwd)/venv/bin:$PATH
+            export PYTHONPATH=$(pwd)/src:$(pwd)/venv/lib/python3.12/site-packages:$PYTHONPATH
             unset SOURCE_DATE_EPOCH
             export PS1="ami|$PS1"
             [ ! -f .creds ] || source .creds
@@ -71,13 +70,17 @@
         packages.default = python.pkgs.buildPythonApplication rec {
           inherit version;
           pname   = "${name}";
-          src     = self;
+          src     = [ self ];
           format  = "other";
           doCheck = false;
           propagatedBuildInputs = runtime-deps ++ cc-deps;
-          # nb: odd behaviour in that nix build seems to introspect the string below
-          installPhase = "mkdir -p $out/bin && cp -p app/ami.py $out/bin/ami.py && cp -ap src $out/lib";
-          postFixup = "wrapProgram $out/bin/ami.py --prefix PYTHONPATH : $out/lib --prefix PYTHONPATH : $PYTHONPATH  --prefix PATH : ${python}/bin";
+          installPhase = ''
+            mkdir -p $out/bin
+            cp -p app/ami.py $out/bin/ami.py
+            cp -ap src $out/lib
+            cp -ap lib $out/
+          '';
+          postFixup = "wrapProgram $out/bin/ami.py --prefix PYTHONPATH : $out/lib  --prefix PYTHONPATH : $out/lib/lib/python3.12/site-packages --prefix PYTHONPATH : $PYTHONPATH --prefix PATH : ${python}/bin --prefix PATH : $out/lib/bin";
         };
         defaultPackage = self.packages.${system}.default;
 
@@ -134,40 +137,15 @@
           };
         };
 
-        # letta shell script
-        packages.letta-script =
-          let letta-script = pkgs.writeShellScriptBin "letta.sh" ''
-                export LANG=en_US.UTF-8
-                export PIP_PREFIX=$(pwd)/venv/pypi
-                export PATH=$(pwd)/bin:$PIP_PREFIX/bin:$PATH
-                unset SOURCE_DATE_EPOCH
-                [ ! -f .creds-rds ]      || source .creds-rds
-                [ ! -f .openai-api-key ] || source .openai-api-key
-                python -m venv ./venv
-                source ./venv/bin/activate
-                echo letta server
-              '';
-              bldInputs = with pkgs; [
-                self.defaultPackage.${system}
-              ];
-          in pkgs.symlinkJoin {
-            name = "letta.sh";
-            paths = [ letta-script ] ++ bldInputs;
-            buildInputs = [ pkgs.makeWrapper ];
-            postBuild = "wrapProgram $out/bin/${name} --prefix PATH : $out/bin";
-          };
-
         # dev environment
         devShells.default = pkgs.mkShell.override { stdenv = pkgs.gcc14Stdenv; } rec {
           LD_LIBRARY_PATH = "$LD_LIBRARY_PATH:${pkgs.stdenv.cc.cc.lib}/lib";
-          packages = cc-deps ++ runtime-deps ++ [ python-pkgs.venvShellHook ];
+          packages = cc-deps ++ runtime-deps; # ++ [ python-pkgs.venvShellHook ];
           nativeBuildInputs = dev-deps;
 
-          venv = "venv";
+          venv = "lib";
           src = null;
-          postVenv = ''
-            unset SOURCE_DATE_EPOCH
-          '';
+          postVenv = "unset SOURCE_DATE_EPOCH";
           postShellHook = ''
             unset SOURCE_DATE_EPOCH
             unset LD_PRELOAD
@@ -179,41 +157,3 @@
       }
     );
 }
-
-
-# {
-#   description = "Nix Development Flake for your package";
-#   inputs.nixpkgs.url = "github:NixOS/nixpkgs/master";
-#   outputs =
-#     { self, nixpkgs, flake-utils }:
-#     flake-utils.lib.eachDefaultSystem
-#       (system:
-#       let
-#         pkgs = import nixpkgs { inherit system; };
-#         python = pkgs.python310;
-#         pythonPackages = python.pkgs;
-#       in
-#       {
-#         devShells.default = pkgs.mkShell {
-#           name = "your_package";
-#           nativeBuildInputs = [ pkgs.bashInteractive ];
-#           buildInputs = with pythonPackages; [
-#             pkgs.nodePackages.pyright
-#             pkgs.poetry
-#             setuptools
-#             wheel
-#             venvShellHook
-#           ];
-#           venvDir = ".venv";
-#           src = null;
-#           postVenv = ''
-#             unset SOURCE_DATE_EPOCH
-#           '';
-#           postShellHook = ''
-#             unset SOURCE_DATE_EPOCH
-#             unset LD_PRELOAD
-#             PYTHONPATH=$PWD/$venvDir/${python.sitePackages}:$PYTHONPATH
-#           '';
-#         };
-#       });
-# }

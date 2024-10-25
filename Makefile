@@ -35,7 +35,7 @@ install-venv: create-venv ## create venv environment
 	pip install -r requirements.txt
 
 create-venv: ## create initial venv environment
-	virtualenv venv
+	virtualenv lib
 
 install-letta: ## install letta
 	venv-pack -o letta.zip
