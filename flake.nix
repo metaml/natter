@@ -36,6 +36,7 @@
                            python-pkgs.pyjwt
                            python-pkgs.pyyaml
                            python-pkgs.regex
+                           python-pkgs.requests
                            python-pkgs.setuptools
                            python-pkgs.termcolor
                            python-pkgs.tiktoken
