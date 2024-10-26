@@ -43,6 +43,7 @@
                            python-pkgs.urllib3
                            python-pkgs.uvicorn
                            python-pkgs.virtualenv
+                           python-pkgs.wcwidth
                          ];
           dev-deps = with pkgs; [ awscli2
                                   docker
@@ -80,14 +81,18 @@
           propagatedBuildInputs = runtime-deps ++ cc-deps;
           installPhase = ''
             mkdir -p $out/bin
-            cp -p  app/ami.py $out/bin/ami.py
+            cp -p  app/ami.py $out/bin
+            cp -p  app/letta.py $out/bin
             mkdir $out/etc
             cp -p etc/key.pem $out/etc
             cp -p etc/cert.pem $out/etc
             cp -ap src $out/lib
             cp -ap venv $out/
           '';
-          postFixup = "wrapProgram $out/bin/ami.py --prefix PYTHONPATH : $out/lib --prefix PYTHONPATH : $out/venv  --prefix PYTHONPATH : $out/venv/lib/python3.12/site-packages --prefix PYTHONPATH : $PYTHONPATH --prefix PATH : ${python}/bin --prefix PATH : $out/venv/bin --prefix SSL_KEY : $out/etc/key.pem --prefix SSL_CERT : $out/etc/cert.pem --prefix STATIC_DIR : '/static'";
+          postFixup = ''
+            wrapProgram $out/bin/ami.py --prefix PYTHONPATH : $out/lib --prefix PYTHONPATH : $out/venv  --prefix PYTHONPATH : $out/venv/lib/python3.12/site-packages --prefix PYTHONPATH : $PYTHONPATH --prefix PATH : ${python}/bin --prefix PATH : $out/venv/bin --prefix SSL_KEY : $out/etc/key.pem --prefix SSL_CERT : $out/etc/cert.pem --prefix STATIC_DIR : '/static'
+            wrapProgram $out/bin/letta.py --prefix PYTHONPATH : $out/lib --prefix PYTHONPATH : $out/venv  --prefix PYTHONPATH : $out/venv/lib/python3.12/site-packages --prefix PYTHONPATH : $PYTHONPATH --prefix PATH : ${python}/bin --prefix PATH : $out/venv/bin
+          '';
         };
         defaultPackage = self.packages.${system}.default;
 
