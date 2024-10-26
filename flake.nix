@@ -97,33 +97,30 @@
         inherit (deploy) defaultApp;
         deploy.nodes.ami = {
           hostname = "localhost";
-          profiles.ami = {
-            path = systemd.lib.${system}.mkSystemService "ami" {
-              path = deploy.lib.${system}.setActivate nixpkgs.legacyPackages.${system}.ami "./bin/ami.py";
-              serviceConfig = {
-                ExecStart = "ami.py";
-                Restart   = "always";
-                Killmode  = "mixed";
+          profiles = [
+            { path = systemd.lib.${system}.mkSystemService "ami" {
+                path = deploy.lib.${system}.setActivate nixpkgs.legacyPackages.${system}.ami "./bin/ami.py";
+                serviceConfig = {
+                  ExecStart = "ami.py";
+                  Restart   = "always";
+                  Killmode  = "mixed";
+                };
+                description = "ami rest service";
               };
-              description = "ami rest service";
-            };
-            activate = "$PROFILE/bin/activate";
-          };
-        };
-        deploy.nodes.letta = {
-          hostname = "localhost";
-          profiles.letta = {
-            path = systemd.lib.${system}.mkSystemService "letta" {
-              path = deploy.lib.${system}.setActivate nixpkgs.legacyPackages.${system}.ami "./bin/letta.py";
-              serviceConfig = {
-                ExecStart = "letta.sh";
-                Restart   = "always";
-                Killmode  = "mixed";
+              activate = "$PROFILE/bin/activate";
+            }
+            { path = systemd.lib.${system}.mkSystemService "letta" {
+                path = deploy.lib.${system}.setActivate nixpkgs.legacyPackages.${system}.ami "./bin/letta.py";
+                serviceConfig = {
+                  ExecStart = "letta.py";
+                  Restart   = "always";
+                  Killmode  = "mixed";
+                };
+                description = "letta (memgpt) service";
               };
-              description = "letta rest service";
-            };
-            activate = "$PROFILE/bin/activate";
-          };
+              activate = "$PROFILE/bin/activate";
+            }
+          ];
         };
 
         # docker image
