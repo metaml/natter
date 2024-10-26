@@ -11,35 +11,37 @@
 
   outputs = { self, nixpkgs, systemd, deploy, utils }:
     utils.lib.eachDefaultSystem ( system:
-      let name    = "ami";
-          version = "0.1.0.0";
+      let name        = "ami";
+          version     = "0.1.0.0";
           pkgs        = nixpkgs.legacyPackages.${system};
           clang       = pkgs.clang;
           llvm-pkgs   = pkgs.llvmPackages;
           python      = pkgs.python312;
           python-pkgs = pkgs.python312Packages;
 
-          runtime-deps    = [ pkgs.cacert
-                              python
-                              python-pkgs.asyncpg
-                              python-pkgs.boto3
-                              python-pkgs.cryptography
-                              python-pkgs.environs
-                              python-pkgs.fastapi
-                              python-pkgs.jinja2
-                              python-pkgs.numpy
-                              python-pkgs.openai
-                              python-pkgs.passlib
-                              python-pkgs.pydantic-core
-                              python-pkgs.python-multipart
-                              python-pkgs.pyjwt
-                              python-pkgs.setuptools
-                              python-pkgs.termcolor
-                              python-pkgs.typer
-                              python-pkgs.urllib3
-                              python-pkgs.uvicorn
-                              python-pkgs.virtualenv
-                            ];
+          runtime-deps = [ pkgs.cacert
+                           python
+                           python-pkgs.asyncpg
+                           python-pkgs.boto3
+                           python-pkgs.colorama
+                           python-pkgs.cryptography
+                           python-pkgs.environs
+                           python-pkgs.fastapi
+                           python-pkgs.jinja2
+                           python-pkgs.numpy
+                           python-pkgs.openai
+                           python-pkgs.passlib
+                           python-pkgs.pydantic-core
+                           python-pkgs.python-multipart
+                           python-pkgs.pyjwt
+                           python-pkgs.pyyaml
+                           python-pkgs.setuptools
+                           python-pkgs.termcolor
+                           python-pkgs.typer
+                           python-pkgs.urllib3
+                           python-pkgs.uvicorn
+                           python-pkgs.virtualenv
+                         ];
           dev-deps = with pkgs; [ awscli2
                                   docker
                                   git
@@ -76,11 +78,14 @@
           propagatedBuildInputs = runtime-deps ++ cc-deps;
           installPhase = ''
             mkdir -p $out/bin
-            cp -p app/ami.py $out/bin/ami.py
+            cp -p  app/ami.py $out/bin/ami.py
+            mkdir $out/etc
+            cp -p etc/key.pem $out/etc
+            cp -p etc/cert.pem $out/etc
             cp -ap src $out/lib
             cp -ap venv $out/
           '';
-          postFixup = "wrapProgram $out/bin/ami.py --prefix PYTHONPATH : $out/venv  --prefix PYTHONPATH : $out/venv/lib/python3.12/site-packages --prefix PYTHONPATH : $PYTHONPATH --prefix PATH : ${python}/bin --prefix PATH : $out/venv/bin";
+          postFixup = "wrapProgram $out/bin/ami.py --prefix PYTHONPATH : $out/lib --prefix PYTHONPATH : $out/venv  --prefix PYTHONPATH : $out/venv/lib/python3.12/site-packages --prefix PYTHONPATH : $PYTHONPATH --prefix PATH : ${python}/bin --prefix PATH : $out/venv/bin --prefix SSL_KEY : $out/etc/key.pem --prefix SSL_CERT : $out/etc/cert.pem --prefix STATIC_DIR : '/static'";
         };
         defaultPackage = self.packages.${system}.default;
 

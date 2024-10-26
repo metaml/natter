@@ -22,7 +22,8 @@ push: image image-push ## * make and push docker-image to ecr; update lambda *
 image: ## docker image
 	nix build --impure --verbose --option sandbox relaxed .#docker
 
-install: ## @ install ami flake @
+install: clobber create-venv install-venv ## @ install ami flake @
+	nix profile remove 1
 	nix profile install
 
 install-app: ## install javascript client
@@ -35,7 +36,7 @@ install-venv: create-venv ## create venv environment
 	pip install -r requirements.txt
 
 create-venv: ## create initial venv environment
-	virtualenv lib
+	virtualenv venv
 
 install-letta: ## install letta
 	venv-pack -o letta.zip

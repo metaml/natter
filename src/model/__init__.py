@@ -39,7 +39,6 @@ async def lifespan(app: fastapi.FastAPI):
   clients['openai'] = openai.AsyncOpenAI(**client_args)
 
   clients['letta'] = create_client(base_url="http://localhost:8283")
-
   # @todo: run uvicore all within a pthyon app
   # ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
   # ssl_context.load_cert_chain('etc/cert.pem', keyfile='etc/key.pem')
@@ -54,6 +53,8 @@ def app():
   else:
     logging.basicConfig(level=logging.DEBUG)
 
+  static_dir = os.getenv('STATIC_DIR') or 'static'
+
   origins = Env().list("ALLOWED_ORIGINS", [ "https://alb-64c71258f6c9e59f.elb.us-east-2.amazonaws.com",
                                             "https://alb-64c71258f6c9e59f.elb.us-east-2.amazonaws.com:8000",
                                             "https://localhost:8000"
@@ -62,7 +63,7 @@ def app():
   app = fastapi.FastAPI(docs_url="/", lifespan=lifespan)
 
   # fastapi only references relative directory paths
-  app.mount("/static", StaticFiles(directory="static"), name="static")
+  app.mount("/static", StaticFiles(directory=static_dir), name="static")
   app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
