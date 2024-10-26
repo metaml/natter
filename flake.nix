@@ -53,12 +53,6 @@
                                   jq
                                   postgresql_16
                                 ];
-          # cc-deps = with llvm-pkgs; [ clang
-          #                             clang-tools
-          #                             libcxx
-          #                             libstdcxxClang
-          #                             pkgs.stdenv.cc.cc.lib
-          #                           ];
           cc-deps = with pkgs; [ gcc14Stdenv
                                  gcc-unwrapped.lib
                                ];
@@ -116,21 +110,21 @@
             activate = "$PROFILE/bin/activate";
           };
         };
-        # deploy.nodes.letta = {
-        #   hostname = "localhost";
-        #   profiles.letta = {
-        #     path = systemd.lib.${system}.mkSystemService "letta" {
-        #       path = deploy.lib.${system}.setActivate nixpkgs.legacyPackages.${system}.ami "./bin/letta.sh";
-        #       serviceConfig = {
-        #         ExecStart = "letta.sh";
-        #         Restart   = "always";
-        #         Killmode  = "mixed";
-        #       };
-        #       description = "letta rest service";
-        #     };
-        #     activate = "$PROFILE/bin/activate";
-        #   };
-        # };
+        deploy.nodes.letta = {
+          hostname = "localhost";
+          profiles.letta = {
+            path = systemd.lib.${system}.mkSystemService "letta" {
+              path = deploy.lib.${system}.setActivate nixpkgs.legacyPackages.${system}.ami "./bin/letta.py";
+              serviceConfig = {
+                ExecStart = "letta.sh";
+                Restart   = "always";
+                Killmode  = "mixed";
+              };
+              description = "letta rest service";
+            };
+            activate = "$PROFILE/bin/activate";
+          };
+        };
 
         # docker image
         packages.docker = pkgs.dockerTools.buildImage {
