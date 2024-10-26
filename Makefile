@@ -23,7 +23,6 @@ image: ## docker image
 	nix build --impure --verbose --option sandbox relaxed .#docker
 
 install: clobber create-venv install-venv ## @ install ami flake @
-	nix profile remove 1
 	nix profile install
 
 install-app: ## install javascript client
