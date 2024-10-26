@@ -35,8 +35,10 @@
                            python-pkgs.python-multipart
                            python-pkgs.pyjwt
                            python-pkgs.pyyaml
+                           python-pkgs.regex
                            python-pkgs.setuptools
                            python-pkgs.termcolor
+                           python-pkgs.tiktoken
                            python-pkgs.typer
                            python-pkgs.urllib3
                            python-pkgs.uvicorn
