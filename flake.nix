@@ -2,11 +2,11 @@
   description = "ami rest";
 
   inputs = {
-    nixpkgs.url     = "nixpkgs/nixpkgs-unstable";
-    systemd.url     = "github:serokell/systemd-nix";
+    nixpkgs.url = "nixpkgs/nixpkgs-unstable";
+    systemd.url = "github:serokell/systemd-nix";
     systemd.inputs.nixpkgs.follows = "nixpkgs";
-    deploy.url      = "github:serokell/deploy-rs";
-    utils.url       = "github:numtide/flake-utils";
+    deploy.url  = "github:serokell/deploy-rs";
+    utils.url   = "github:numtide/flake-utils";
   };
 
   outputs = { self, nixpkgs, systemd, deploy, utils }:
@@ -81,6 +81,7 @@
             mkdir $out/etc
             cp -p etc/key.pem $out/etc
             cp -p etc/cert.pem $out/etc
+            cp -p etc/letta.service $out/etc
             cp -ap src $out/lib
             cp -ap venv $out/
           '';
@@ -89,38 +90,38 @@
             wrapProgram $out/bin/letta.py --prefix PYTHONPATH : $out/lib --prefix PYTHONPATH : $out/venv  --prefix PYTHONPATH : $out/venv/lib/python3.12/site-packages --prefix PYTHONPATH : $PYTHONPATH --prefix PATH : ${python}/bin --prefix PATH : $out/venv/bin
           '';
         };
-        defaultPackage = self.packages.${system}.default;
-
+        # defaultPackage = self.packages.${system}.default; # deprecated
         # needed by deploy below
-        apps.default = utils.lib.mkApp { drv = self.packages.${system}.default; };
+        apps.ami   = utils.lib.mkApp { drv = self.packages.${system}.default; };
+        apps.letta = utils.lib.mkApp { drv = self.packages.${system}.default; };
+
         # deploy systemd config: nix run
-        inherit (deploy) defaultApp;
-        deploy.nodes.ami = {
+        deploy.nodes.default = {
           hostname = "localhost";
-          profiles = [
-            { path = systemd.lib.${system}.mkSystemService "ami" {
-                path = deploy.lib.${system}.setActivate nixpkgs.legacyPackages.${system}.ami "./bin/ami.py";
-                serviceConfig = {
-                  ExecStart = "ami.py";
-                  Restart   = "always";
-                  Killmode  = "mixed";
-                };
-                description = "ami rest service";
+          profiles.ami = {
+            path = systemd.lib.${system}.mkSystemService "ami" {
+              path = deploy.lib.${system}.setActivate nixpkgs.legacyPackages.${system}.ami "./bin/ami.py";
+              serviceConfig = {
+                ExecStart = "ami.py";
+                Restart   = "always";
+                Killmode  = "mixed";
               };
-              activate = "$PROFILE/bin/activate";
-            }
-            { path = systemd.lib.${system}.mkSystemService "letta" {
-                path = deploy.lib.${system}.setActivate nixpkgs.legacyPackages.${system}.ami "./bin/letta.py";
-                serviceConfig = {
-                  ExecStart = "letta.py";
-                  Restart   = "always";
-                  Killmode  = "mixed";
-                };
-                description = "letta (memgpt) service";
+              description = "ami rest service";
+            };
+            activate = "$PROFILE/bin/activate";
+          };
+          profiles.letta = {
+            path = systemd.lib.${system}.mkSystemService "letta" {
+              path = deploy.lib.${system}.setActivate nixpkgs.legacyPackages.${system}.ami "./bin/letta.py";
+              serviceConfig = {
+                ExecStart = "letta.py";
+                Restart   = "always";
+                Killmode  = "mixed";
               };
-              activate = "$PROFILE/bin/activate";
-            }
-          ];
+              description = "letta (memgpt) service";
+            };
+            activate = "$PROFILE/bin/activate";
+          };
         };
 
         # docker image
@@ -135,7 +136,7 @@
               cacert
               coreutils
               python
-              self.defaultPackage.${system}
+              self.packages.${system}.default
             ];
             pathsToLink = [ "/bin" "/usr" ];
           };
@@ -157,7 +158,6 @@
 
           shellHook = "${shell-hook}";
         };
-        devShell = self.devShells.${system}.default;
       }
     );
 }
