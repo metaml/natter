@@ -14,8 +14,6 @@
       let name        = "ami";
           version     = "0.1.0.0";
           pkgs        = nixpkgs.legacyPackages.${system};
-          clang       = pkgs.clang;
-          llvm-pkgs   = pkgs.llvmPackages;
           python      = pkgs.python312;
           python-pkgs = pkgs.python312Packages;
 
@@ -53,7 +51,8 @@
                                   jq
                                   postgresql_16
                                 ];
-          cc-deps = with pkgs; [ gcc14Stdenv
+          cc-deps = with pkgs; [ gcc14
+                                 gcc14Stdenv
                                  gcc-unwrapped.lib
                                ];
           shell-hook = ''

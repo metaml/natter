@@ -26,7 +26,7 @@ install: clobber create-venv install-venv ## @ install ami flake @
 	nix profile install
 
 install-app: ## install javascript client
-	rsync --delete --archive static/ /static/
+	rsync --verbose --delete --archive static/ /static/
 
 install-cert: ## install self-signed ssl cert
 	cp -f etc/*.pem /etc
