@@ -19,13 +19,17 @@
 
           runtime-deps = [ pkgs.cacert
                            python
+                           python-pkgs.ipython
+                           python-pkgs.onnxruntime
                            python-pkgs.asyncpg
                            python-pkgs.boto3
+                           python-pkgs.chroma-hnswlib
                            python-pkgs.colorama
                            python-pkgs.cryptography
                            python-pkgs.environs
                            python-pkgs.fastapi
                            python-pkgs.jinja2
+                           python-pkgs.grpcio
                            python-pkgs.numpy
                            python-pkgs.openai
                            python-pkgs.passlib
@@ -38,6 +42,7 @@
                            python-pkgs.setuptools
                            python-pkgs.termcolor
                            python-pkgs.tiktoken
+                           python-pkgs.tokenizers
                            python-pkgs.typer
                            python-pkgs.urllib3
                            python-pkgs.uvicorn
@@ -59,6 +64,7 @@
             export LANG=en_US.UTF-8
             export PATH=$(pwd)/app:$(pwd)/venv/bin:$PATH
             export PYTHONPATH=$(pwd)/src:$(pwd)/venv/lib/python3.12/site-packages:$PYTHONPATH
+            export LD_LIBRARY_PATH="${pkgs.gcc14Stdenv.cc.cc.lib}/lib";
             unset SOURCE_DATE_EPOCH
             export PS1="ami|$PS1"
             [ ! -f .creds ] || source .creds
@@ -80,7 +86,7 @@
             mkdir $out/etc
             cp -p etc/key.pem $out/etc
             cp -p etc/cert.pem $out/etc
-            cp -p etc/letta.service $out/etc
+            cp -p etc/nixos/*.nix $out/etc
             cp -ap src $out/lib
             cp -ap venv $out/
           '';
@@ -94,58 +100,10 @@
         apps.ami   = utils.lib.mkApp { drv = self.packages.${system}.default; };
         apps.letta = utils.lib.mkApp { drv = self.packages.${system}.default; };
 
-        # deploy systemd config: nix run
-        deploy.nodes.default = {
-          hostname = "localhost";
-          profiles.ami = {
-            path = systemd.lib.${system}.mkSystemService "ami" {
-              path = deploy.lib.${system}.setActivate nixpkgs.legacyPackages.${system}.ami "./bin/ami.py";
-              serviceConfig = {
-                ExecStart = "ami.py";
-                Restart   = "always";
-                Killmode  = "mixed";
-              };
-              description = "ami rest service";
-            };
-            activate = "$PROFILE/bin/activate";
-          };
-          profiles.letta = {
-            path = systemd.lib.${system}.mkSystemService "letta" {
-              path = deploy.lib.${system}.setActivate nixpkgs.legacyPackages.${system}.ami "./bin/letta.py";
-              serviceConfig = {
-                ExecStart = "letta.py";
-                Restart   = "always";
-                Killmode  = "mixed";
-              };
-              description = "letta (memgpt) service";
-            };
-            activate = "$PROFILE/bin/activate";
-          };
-        };
-
-        # docker image
-        packages.docker = pkgs.dockerTools.buildImage {
-          name = "ami-lambda";
-          tag = "latest";
-          created = "now";
-          copyToRoot = pkgs.buildEnv {
-            inherit name;
-            paths = with pkgs; [
-              bashInteractive
-              cacert
-              coreutils
-              python
-              self.packages.${system}.default
-            ];
-            pathsToLink = [ "/bin" "/usr" ];
-          };
-        };
-
         # dev environment
         devShells.default = pkgs.mkShell.override { stdenv = pkgs.gcc14Stdenv; } rec {
-          LD_LIBRARY_PATH = "$LD_LIBRARY_PATH:${pkgs.stdenv.cc.cc.lib}/lib";
-          packages = cc-deps ++ runtime-deps; # ++ [ python-pkgs.venvShellHook ];
-          nativeBuildInputs = dev-deps;
+          packages = runtime-deps; # ++ [ python-pkgs.venvShellHook ];
+          nativeBuildInputs = dev-deps ++ cc-deps;
 
           venv = "lib";
           src = null;

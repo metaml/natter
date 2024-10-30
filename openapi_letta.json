@@ -86,7 +86,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Tool-Output"
+                  "$ref": "#/components/schemas/letta__schemas__tool__Tool"
                 }
               }
             }
@@ -153,7 +153,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Tool-Output"
+                  "$ref": "#/components/schemas/letta__schemas__tool__Tool"
                 }
               }
             }
@@ -241,6 +241,39 @@
         "operationId": "list_tools",
         "parameters": [
           {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Cursor"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": 50,
+              "title": "Limit"
+            }
+          },
+          {
             "name": "user_id",
             "in": "header",
             "required": false,
@@ -265,7 +298,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Tool-Output"
+                    "$ref": "#/components/schemas/letta__schemas__tool__Tool"
                   },
                   "title": "Response List Tools"
                 }
@@ -335,7 +368,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Tool-Output"
+                  "$ref": "#/components/schemas/letta__schemas__tool__Tool"
                 }
               }
             }
@@ -1055,6 +1088,67 @@
         }
       }
     },
+    "/v1/sources/{source_id}/{file_id}": {
+      "delete": {
+        "tags": [
+          "sources"
+        ],
+        "summary": "Delete File From Source",
+        "description": "Delete a data source.",
+        "operationId": "delete_file_from_source",
+        "parameters": [
+          {
+            "name": "source_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Source Id"
+            }
+          },
+          {
+            "name": "file_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "File Id"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/v1/agents/": {
       "get": {
         "tags": [
@@ -1150,6 +1244,65 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AgentState"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/context": {
+      "get": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Get Agent Context Window",
+        "description": "Retrieve the context window of a specific agent.",
+        "operationId": "get_agent_context_window",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContextWindowOverview"
                 }
               }
             }
@@ -1332,6 +1485,205 @@
             "content": {
               "application/json": {
                 "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/tools": {
+      "get": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Get Tools From Agent",
+        "description": "Get tools from an existing agent",
+        "operationId": "get_tools_from_agent",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/letta__schemas__tool__Tool"
+                  },
+                  "title": "Response Get Tools From Agent"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/add-tool/{tool_id}": {
+      "patch": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Add Tool To Agent",
+        "description": "Add tools to an existing agent",
+        "operationId": "add_tool_to_agent",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          },
+          {
+            "name": "tool_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tool Id"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentState"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/agents/{agent_id}/remove-tool/{tool_id}": {
+      "patch": {
+        "tags": [
+          "agents"
+        ],
+        "summary": "Remove Tool From Agent",
+        "description": "Add tools to an existing agent",
+        "operationId": "remove_tool_from_agent",
+        "parameters": [
+          {
+            "name": "agent_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Agent Id"
+            }
+          },
+          {
+            "name": "tool_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Tool Id"
+            }
+          },
+          {
+            "name": "user_id",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AgentState"
+                }
               }
             }
           },
@@ -2783,7 +3135,7 @@
           "admin",
           "admin"
         ],
-        "summary": "Get All Users",
+        "summary": "List Users",
         "description": "Get a list of all users in the database",
         "operationId": "list_users",
         "parameters": [
@@ -3190,7 +3542,7 @@
           "admin"
         ],
         "summary": "Delete Org",
-        "operationId": "delete_organization",
+        "operationId": "delete_organization_by_id",
         "parameters": [
           {
             "name": "org_id",
@@ -3414,12 +3766,7 @@
             "description": "The ids of the messages in the agent's in-context memory."
           },
           "memory": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/Memory"
-              }
-            ],
-            "description": "The in-context memory of the agent."
+            "$ref": "#/components/schemas/Memory"
           },
           "tools": {
             "items": {
@@ -3476,7 +3823,8 @@
         "type": "string",
         "enum": [
           "memgpt_agent",
-          "split_thread_agent"
+          "split_thread_agent",
+          "o1_agent"
         ],
         "title": "AgentType",
         "description": "Enum to represent the type of agent."
@@ -3973,7 +4321,8 @@
                 "type": "string",
                 "enum": [
                   "none",
-                  "auto"
+                  "auto",
+                  "required"
                 ]
               },
               {
@@ -3983,8 +4332,7 @@
                 "type": "null"
               }
             ],
-            "title": "Tool Choice",
-            "default": "none"
+            "title": "Tool Choice"
           },
           "functions": {
             "anyOf": [
@@ -4135,6 +4483,130 @@
           "message"
         ],
         "title": "Choice"
+      },
+      "ContextWindowOverview": {
+        "properties": {
+          "context_window_size_max": {
+            "type": "integer",
+            "title": "Context Window Size Max",
+            "description": "The maximum amount of tokens the context window can hold."
+          },
+          "context_window_size_current": {
+            "type": "integer",
+            "title": "Context Window Size Current",
+            "description": "The current number of tokens in the context window."
+          },
+          "num_messages": {
+            "type": "integer",
+            "title": "Num Messages",
+            "description": "The number of messages in the context window."
+          },
+          "num_archival_memory": {
+            "type": "integer",
+            "title": "Num Archival Memory",
+            "description": "The number of messages in the archival memory."
+          },
+          "num_recall_memory": {
+            "type": "integer",
+            "title": "Num Recall Memory",
+            "description": "The number of messages in the recall memory."
+          },
+          "num_tokens_external_memory_summary": {
+            "type": "integer",
+            "title": "Num Tokens External Memory Summary",
+            "description": "The number of tokens in the external memory summary (archival + recall metadata)."
+          },
+          "num_tokens_system": {
+            "type": "integer",
+            "title": "Num Tokens System",
+            "description": "The number of tokens in the system prompt."
+          },
+          "system_prompt": {
+            "type": "string",
+            "title": "System Prompt",
+            "description": "The content of the system prompt."
+          },
+          "num_tokens_core_memory": {
+            "type": "integer",
+            "title": "Num Tokens Core Memory",
+            "description": "The number of tokens in the core memory."
+          },
+          "core_memory": {
+            "type": "string",
+            "title": "Core Memory",
+            "description": "The content of the core memory."
+          },
+          "num_tokens_summary_memory": {
+            "type": "integer",
+            "title": "Num Tokens Summary Memory",
+            "description": "The number of tokens in the summary memory."
+          },
+          "summary_memory": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Summary Memory",
+            "description": "The content of the summary memory."
+          },
+          "num_tokens_functions_definitions": {
+            "type": "integer",
+            "title": "Num Tokens Functions Definitions",
+            "description": "The number of tokens in the functions definitions."
+          },
+          "functions_definitions": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/letta__schemas__openai__chat_completion_request__Tool"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Functions Definitions",
+            "description": "The content of the functions definitions."
+          },
+          "num_tokens_messages": {
+            "type": "integer",
+            "title": "Num Tokens Messages",
+            "description": "The number of tokens in the messages list."
+          },
+          "messages": {
+            "items": {
+              "$ref": "#/components/schemas/letta__schemas__message__Message-Output"
+            },
+            "type": "array",
+            "title": "Messages",
+            "description": "The messages in the context window."
+          }
+        },
+        "type": "object",
+        "required": [
+          "context_window_size_max",
+          "context_window_size_current",
+          "num_messages",
+          "num_archival_memory",
+          "num_recall_memory",
+          "num_tokens_external_memory_summary",
+          "num_tokens_system",
+          "system_prompt",
+          "num_tokens_core_memory",
+          "core_memory",
+          "num_tokens_summary_memory",
+          "num_tokens_functions_definitions",
+          "functions_definitions",
+          "num_tokens_messages",
+          "messages"
+        ],
+        "title": "ContextWindowOverview",
+        "description": "Overview of the context window, including the number of messages and tokens."
       },
       "CreateAgent": {
         "properties": {
@@ -5006,12 +5478,24 @@
               }
             ],
             "title": "Arguments"
+          },
+          "function_call_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Function Call Id"
           }
         },
         "type": "object",
         "required": [
           "name",
-          "arguments"
+          "arguments",
+          "function_call_id"
         ],
         "title": "FunctionCallDelta"
       },
@@ -5087,6 +5571,10 @@
               "error"
             ],
             "title": "Status"
+          },
+          "function_call_id": {
+            "type": "string",
+            "title": "Function Call Id"
           }
         },
         "type": "object",
@@ -5094,10 +5582,11 @@
           "id",
           "date",
           "function_return",
-          "status"
+          "status",
+          "function_call_id"
         ],
         "title": "FunctionReturn",
-        "description": "A message representing the return value of a function call (generated by Letta executing the requested function).\n\nAttributes:\n    function_return (str): The return value of the function\n    status (Literal[\"success\", \"error\"]): The status of the function call\n    id (str): The ID of the message\n    date (datetime): The date the message was created in ISO format"
+        "description": "A message representing the return value of a function call (generated by Letta executing the requested function).\n\nAttributes:\n    function_return (str): The return value of the function\n    status (Literal[\"success\", \"error\"]): The status of the function call\n    id (str): The ID of the message\n    date (datetime): The date the message was created in ISO format\n    function_call_id (str): A unique identifier for the function call that generated this message"
       },
       "FunctionSchema": {
         "properties": {
@@ -5355,6 +5844,19 @@
             "type": "integer",
             "title": "Context Window",
             "description": "The context window size for the model."
+          },
+          "put_inner_thoughts_in_kwargs": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Put Inner Thoughts In Kwargs",
+            "description": "Puts 'inner_thoughts' as a kwarg in the function call if this is set to True. This helps with function calling performance and also the generation of inner thoughts.",
+            "default": true
           }
         },
         "type": "object",
@@ -5364,7 +5866,7 @@
           "context_window"
         ],
         "title": "LLMConfig",
-        "description": "Configuration for a Language Model (LLM) model. This object specifies all the information necessary to access an LLM model to usage with Letta, except for secret keys.\n\nAttributes:\n    model (str): The name of the LLM model.\n    model_endpoint_type (str): The endpoint type for the model.\n    model_endpoint (str): The endpoint for the model.\n    model_wrapper (str): The wrapper for the model. This is used to wrap additional text around the input/output of the model. This is useful for text-to-text completions, such as the Completions API in OpenAI.\n    context_window (int): The context window size for the model."
+        "description": "Configuration for a Language Model (LLM) model. This object specifies all the information necessary to access an LLM model to usage with Letta, except for secret keys.\n\nAttributes:\n    model (str): The name of the LLM model.\n    model_endpoint_type (str): The endpoint type for the model.\n    model_endpoint (str): The endpoint for the model.\n    model_wrapper (str): The wrapper for the model. This is used to wrap additional text around the input/output of the model. This is useful for text-to-text completions, such as the Completions API in OpenAI.\n    context_window (int): The context window size for the model.\n    put_inner_thoughts_in_kwargs (bool): Puts 'inner_thoughts' as a kwarg in the function call if this is set to True. This helps with function calling performance and also the generation of inner thoughts."
       },
       "LettaMessage": {
         "properties": {
@@ -6505,14 +7007,8 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^org-[a-fA-F0-9]{8}",
             "title": "Id",
-            "description": "The human-friendly ID of the Org",
-            "examples": [
-              [
-                "org-123e4567-e89b-12d3-a456-426614174000"
-              ]
-            ]
+            "description": "The id of the organization."
           },
           "name": {
             "type": "string",
@@ -6523,12 +7019,13 @@
             "type": "string",
             "format": "date-time",
             "title": "Created At",
-            "description": "The creation date of the user."
+            "description": "The creation date of the organization."
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
+          "id",
           "name"
         ],
         "title": "Organization"
@@ -7025,101 +7522,6 @@
         ],
         "title": "Tool"
       },
-      "Tool-Output": {
-        "properties": {
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description",
-            "description": "The description of the tool."
-          },
-          "source_type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Source Type",
-            "description": "The type of the source code."
-          },
-          "module": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Module",
-            "description": "The module of the function."
-          },
-          "user_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "User Id",
-            "description": "The unique identifier of the user associated with the function."
-          },
-          "id": {
-            "type": "string",
-            "pattern": "^tool-[a-fA-F0-9]{8}",
-            "title": "Id",
-            "description": "The human-friendly ID of the Tool",
-            "examples": [
-              [
-                "tool-123e4567-e89b-12d3-a456-426614174000"
-              ]
-            ]
-          },
-          "name": {
-            "type": "string",
-            "title": "Name",
-            "description": "The name of the function."
-          },
-          "tags": {
-            "items": {
-              "type": "string"
-            },
-            "type": "array",
-            "title": "Tags",
-            "description": "Metadata tags."
-          },
-          "source_code": {
-            "type": "string",
-            "title": "Source Code",
-            "description": "The source code of the function."
-          },
-          "json_schema": {
-            "type": "object",
-            "title": "Json Schema",
-            "description": "The JSON schema of the function."
-          }
-        },
-        "additionalProperties": false,
-        "type": "object",
-        "required": [
-          "name",
-          "tags",
-          "source_code"
-        ],
-        "title": "Tool",
-        "description": "Representation of a tool, which is a function that can be called by the agent.\n\nParameters:\n    id (str): The unique identifier of the tool.\n    name (str): The name of the function.\n    tags (List[str]): Metadata tags.\n    source_code (str): The source code of the function.\n    json_schema (Dict): The JSON schema of the function."
-      },
       "ToolCallFunction-Output": {
         "properties": {
           "name": {
@@ -7210,6 +7612,18 @@
             "title": "User Id",
             "description": "The unique identifier of the user associated with the function."
           },
+          "id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Id",
+            "description": "The unique identifier of the tool. If this is not provided, it will be autogenerated."
+          },
           "name": {
             "anyOf": [
               {
@@ -7247,6 +7661,18 @@
             ],
             "title": "Json Schema",
             "description": "The JSON schema of the function (auto-generated from source_code if not provided)"
+          },
+          "terminal": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terminal",
+            "description": "Whether the tool is a terminal tool (allow requesting heartbeats)."
           }
         },
         "additionalProperties": false,
@@ -7350,6 +7776,11 @@
             "title": "User Id",
             "description": "The unique identifier of the user associated with the function."
           },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "The unique identifier of the tool."
+          },
           "name": {
             "anyOf": [
               {
@@ -7401,10 +7832,17 @@
             "title": "Json Schema",
             "description": "The JSON schema of the function."
           },
-          "id": {
-            "type": "string",
-            "title": "Id",
-            "description": "The unique identifier of the tool."
+          "terminal": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Terminal",
+            "description": "Whether the tool is a terminal tool (allow requesting heartbeats)."
           }
         },
         "additionalProperties": false,
@@ -7763,16 +8201,10 @@
         "properties": {
           "id": {
             "type": "string",
-            "pattern": "^user-[a-fA-F0-9]{8}",
             "title": "Id",
-            "description": "The human-friendly ID of the User",
-            "examples": [
-              [
-                "user-123e4567-e89b-12d3-a456-426614174000"
-              ]
-            ]
+            "description": "The id of the user."
           },
-          "org_id": {
+          "organization_id": {
             "anyOf": [
               {
                 "type": "string"
@@ -7781,8 +8213,9 @@
                 "type": "null"
               }
             ],
-            "title": "Org Id",
-            "description": "The organization id of the user"
+            "title": "Organization Id",
+            "description": "The organization id of the user",
+            "default": "organization-00000000-0000-4000-8000-000000000000"
           },
           "name": {
             "type": "string",
@@ -7794,12 +8227,24 @@
             "format": "date-time",
             "title": "Created At",
             "description": "The creation date of the user."
+          },
+          "updated_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Updated At",
+            "description": "The update date of the user."
+          },
+          "is_deleted": {
+            "type": "boolean",
+            "title": "Is Deleted",
+            "description": "Whether this user is deleted or not.",
+            "default": false
           }
         },
         "additionalProperties": false,
         "type": "object",
         "required": [
-          "org_id",
+          "id",
           "name"
         ],
         "title": "User",
@@ -7808,32 +8253,22 @@
       "UserCreate": {
         "properties": {
           "name": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
+            "type": "string",
             "title": "Name",
             "description": "The name of the user."
           },
-          "org_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Org Id",
+          "organization_id": {
+            "type": "string",
+            "title": "Organization Id",
             "description": "The organization id of the user."
           }
         },
         "additionalProperties": false,
         "type": "object",
+        "required": [
+          "name",
+          "organization_id"
+        ],
         "title": "UserCreate"
       },
       "UserMessage-Input": {
@@ -7951,12 +8386,17 @@
           "arguments": {
             "type": "string",
             "title": "Arguments"
+          },
+          "function_call_id": {
+            "type": "string",
+            "title": "Function Call Id"
           }
         },
         "type": "object",
         "required": [
           "name",
-          "arguments"
+          "arguments",
+          "function_call_id"
         ],
         "title": "FunctionCall"
       },
@@ -8082,6 +8522,27 @@
         ],
         "title": "Message",
         "description": "Letta's internal representation of a message. Includes methods to convert to/from LLM provider formats.\n\nAttributes:\n    id (str): The unique identifier of the message.\n    role (MessageRole): The role of the participant.\n    text (str): The text of the message.\n    user_id (str): The unique identifier of the user.\n    agent_id (str): The unique identifier of the agent.\n    model (str): The model used to make the function call.\n    name (str): The name of the participant.\n    created_at (datetime): The time the message was created.\n    tool_calls (List[ToolCall]): The list of tool calls requested.\n    tool_call_id (str): The id of the tool call."
+      },
+      "letta__schemas__openai__chat_completion_request__Tool": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "function"
+            ],
+            "const": "function",
+            "title": "Type",
+            "default": "function"
+          },
+          "function": {
+            "$ref": "#/components/schemas/FunctionSchema"
+          }
+        },
+        "type": "object",
+        "required": [
+          "function"
+        ],
+        "title": "Tool"
       },
       "letta__schemas__openai__chat_completion_request__ToolCall": {
         "properties": {
@@ -8322,6 +8783,101 @@
           "function"
         ],
         "title": "ToolCall"
+      },
+      "letta__schemas__tool__Tool": {
+        "properties": {
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description",
+            "description": "The description of the tool."
+          },
+          "source_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Type",
+            "description": "The type of the source code."
+          },
+          "module": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Module",
+            "description": "The module of the function."
+          },
+          "user_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Id",
+            "description": "The unique identifier of the user associated with the function."
+          },
+          "id": {
+            "type": "string",
+            "pattern": "^tool-[a-fA-F0-9]{8}",
+            "title": "Id",
+            "description": "The human-friendly ID of the Tool",
+            "examples": [
+              [
+                "tool-123e4567-e89b-12d3-a456-426614174000"
+              ]
+            ]
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "The name of the function."
+          },
+          "tags": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Tags",
+            "description": "Metadata tags."
+          },
+          "source_code": {
+            "type": "string",
+            "title": "Source Code",
+            "description": "The source code of the function."
+          },
+          "json_schema": {
+            "type": "object",
+            "title": "Json Schema",
+            "description": "The JSON schema of the function."
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "name",
+          "tags",
+          "source_code"
+        ],
+        "title": "Tool",
+        "description": "Representation of a tool, which is a function that can be called by the agent.\n\nParameters:\n    id (str): The unique identifier of the tool.\n    name (str): The name of the function.\n    tags (List[str]): Metadata tags.\n    source_code (str): The source code of the function.\n    json_schema (Dict): The JSON schema of the function."
       }
     }
   },

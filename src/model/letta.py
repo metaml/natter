@@ -3,7 +3,6 @@ from .chat import Message, ChatRes, ChatReq
 from datetime import datetime
 from fastapi import APIRouter, Depends, FastAPI, Request, responses
 from fastapi.responses import HTMLResponse
-from letta import create_client
 from typing import Annotated
 import asyncio as aio
 import json
@@ -32,7 +31,7 @@ async def talk(req: Request):
 async def talk(req: ChatReq) -> ChatRes:
   client = clients['letta']
   res = client.send_message(
-    agent_id = 'agent-3f8d9891-54d0-45cc-a697-87a4e3556b06',
+    agent_id = clients['letta_agent'],
     role     = 'user',
     message  = req.messages[0].content
   )

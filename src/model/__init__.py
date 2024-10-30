@@ -4,7 +4,8 @@ from environs import Env
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
-from letta import create_client
+from letta.schemas.memory import ChatMemory
+from letta import ChatMemory, EmbeddingConfig, LLMConfig, create_client
 import contextlib
 import fastapi
 import logging
@@ -38,7 +39,20 @@ async def lifespan(app: fastapi.FastAPI):
   client_args['api_key'] = key
   clients['openai'] = openai.AsyncOpenAI(**client_args)
 
-  clients['letta'] = create_client(base_url="http://localhost:8283")
+  #letta = create_client(base_url = 'http://localhost:8283');
+  letta = create_client() # uses LocalClient, RESTClient is full of bugs
+  letta.set_default_llm_config(LLMConfig.default_config('gpt-4'))
+  letta.set_default_embedding_config(EmbeddingConfig.default_config('text-embedding-ada-002'))
+  if not letta.agent_exists(agent_name = 'Courtney'):
+    agent_state = letta.create_agent(
+      name = 'Courtney',
+      memory = ChatMemory( human   = "My name is Courtney",
+                           persona = "I'm a sympathetic friend and confidante to Chad."
+                         )
+    )
+  clients['letta'] = letta
+  clients['letta_agent'] = letta.get_agent_id(agent_name = 'Courtney')
+
   # @todo: run uvicore all within a pthyon app
   # ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
   # ssl_context.load_cert_chain('etc/cert.pem', keyfile='etc/key.pem')
