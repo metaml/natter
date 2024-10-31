@@ -74,15 +74,15 @@ help: ## * help
 	| awk 'BEGIN {FS = ":.*?## "}; {printf "$(BLU)%-18s$(CLR) %s\n", $$1, $$2}'
 
 login-aws: ## login to aws to fetch/refresh token
-	PYTHONPATH= $(AWS) sso login # AdministratorAccess-975050288432
+	aws sso login # AdministratorAccess-975050288432
 
 # useful utlities below
 
 image-push: REGION = us-east-2
-image-push: DOCKER_LOGIN = $(shell $(AWS) ecr get-login-password --region $(REGION))
+image-push: DOCKER_LOGIN = $(shell aws ecr get-login-password --region $(REGION))
 image-push: ## * push image to ecr *
 	docker tag ami-lambda:latest $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/ami-lambda:latest
-	$(AWS) ecr get-login-password --region $(REGION) \
+	aws ecr get-login-password --region $(REGION) \
 	| docker login --username AWS --password-stdin $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com
 	docker push $(ACCOUNT_ID).dkr.ecr.$(REGION).amazonaws.com/ami-lambda:latest
 
@@ -95,7 +95,7 @@ image-run: ## run the image
 image-clean: ## remove images
 	docker system prune -a --volumes
 
-api-test: OPENAI_API_KEY = $(shell $(AWS) secretsmanager get-secret-value --secret-id=openai-api-key --output json | jq --raw-output '.SecretString')
+api-test: OPENAI_API_KEY = $(shell aws secretsmanager get-secret-value --secret-id=openai-api-key --output json | jq --raw-output '.SecretString')
 api-test: ## test openai api
 	curl https://api.openai.com/v1/chat/completions \
 	--header "Content-Type: application/json" \
@@ -131,20 +131,20 @@ export PGHOST =# aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com
 db-creds: ## save dev db crendentials
 	cp /dev/null .creds
 	echo 'export PGUSER=aip-dev' > .creds
-	$(AWS) secretsmanager get-secret-value --secret-id=db-password | head -1 | awk '{ print "export PGPASSWORD="$$4 }' >> .creds
+	aws secretsmanager get-secret-value --secret-id=db-password | head -1 | awk '{ print "export PGPASSWORD="$$4 }' >> .creds
 	echo 'export PGHOST=' >> .creds
 	@echo ".creds created"
 
 db-creds-rds: ## save rds db crendentials
 	cp /dev/null .creds-rds
-	$(AWS) secretsmanager get-secret-value --secret-id=db-user | head -1 | awk '{ print "export PGUSER="$$4 }' >> .creds-rds
-	$(AWS) secretsmanager get-secret-value --secret-id=db-password | head -1 | awk '{ print "export PGPASSWORD="$$4 }' >> .creds-rds
+	aws secretsmanager get-secret-value --secret-id=db-user | head -1 | awk '{ print "export PGUSER="$$4 }' >> .creds-rds
+	aws secretsmanager get-secret-value --secret-id=db-password | head -1 | awk '{ print "export PGPASSWORD="$$4 }' >> .creds-rds
 	echo 'export PGHOST=aip.c7eaoykysgcc.us-east-2.rds.amazonaws.com' >> .creds-rds
 	@echo ".creds-rds created"
 
 openai-api-key: ## save openai api key
 	cp /dev/null .openai-api-key
-	$(AWS) secretsmanager get-secret-value --secret-id=openai-api-key | jq -r '.SecretString' | awk '{ print "export OPENAI_API_KEY="$$1 }' >> .openai-api-key
+	aws secretsmanager get-secret-value --secret-id=openai-api-key | jq -r '.SecretString' | awk '{ print "export OPENAI_API_KEY="$$1 }' >> .openai-api-key
 
 psql-rds: ## connect to rds instance--"make db-creds" at least once
 	source ./.creds-rds && psql
