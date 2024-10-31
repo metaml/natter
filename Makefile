@@ -1,7 +1,6 @@
 .DEFAULT_GOAL = help
 
 ACCOUNT_ID := 975050288432
-AWS := PYTHONPATH= aws # aws and openai dependency conflict with urllib3
 
 run: export AWS_DEFAULT_REGION = us-east-2
 run: ## run ami, rest server

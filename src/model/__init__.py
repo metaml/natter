@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.staticfiles import StaticFiles
 from letta.schemas.memory import ChatMemory
-from letta import ChatMemory, EmbeddingConfig, LLMConfig, create_client
+from letta import EmbeddingConfig, LLMConfig, create_client
 import contextlib
 import fastapi
 import logging

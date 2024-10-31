@@ -26,8 +26,8 @@ if __name__ == '__main__':
      #uvicorn = f"uvicorn aip:aip --reload --host {ip} --port {port}"
      uvicorn = f"uvicorn aip:aip --reload --host {ip} --port {port}  --ssl-keyfile {key} --ssl-certfile {cert}"
 
-   arg = shlex.split(uvicorn)
-   res = subproc.run(arg, text=True)
+   args = shlex.split(uvicorn)
+   res = subproc.run(args, text=True)
   except Exception as e:
     print("exception: ", e, file=sys.stderr)
     sys.exit(0)

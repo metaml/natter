@@ -92,9 +92,14 @@
           '';
           postFixup = ''
             wrapProgram $out/bin/ami.py --prefix PYTHONPATH : $out/lib --prefix PYTHONPATH : $out/venv  --prefix PYTHONPATH : $out/venv/lib/python3.12/site-packages --prefix PYTHONPATH : $PYTHONPATH --prefix PATH : ${python}/bin --prefix PATH : $out/venv/bin --prefix SSL_KEY : $out/etc/key.pem --prefix SSL_CERT : $out/etc/cert.pem --prefix STATIC_DIR : '/static'
-            wrapProgram $out/bin/letta.py --prefix PYTHONPATH : $out/lib --prefix PYTHONPATH : $out/venv  --prefix PYTHONPATH : $out/venv/lib/python3.12/site-packages --prefix PYTHONPATH : $PYTHONPATH --prefix PATH : ${python}/bin --prefix PATH : $out/venv/bin
+            wrapProgram $out/bin/letta.py --prefix PYTHONPATH : $PYTHONPATH --prefix PYTHONPATH : $out/venv/lib/python3.12/site-packages --prefix PYTHONPATH : $out/lib --prefix PATH : ${python}/bin --prefix PATH : $out/venv/bin
           '';
         };
+
+        # wrapProgram $out/bin/letta.py --prefix PYTHONPATH : $out/lib --prefix PYTHONPATH : $out/venv  --prefix PYTHONPATH : $out/venv/lib/python3.12/site-packages --prefix PATH : ${python}/bin --prefix PATH : $out/venv/bin
+
+
+        # venv/lib/python3.12/site-packages/
         # defaultPackage = self.packages.${system}.default; # deprecated
         # needed by deploy below
         apps.ami   = utils.lib.mkApp { drv = self.packages.${system}.default; };
