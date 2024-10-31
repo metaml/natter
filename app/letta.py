@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 
 import os
-for p in os.getenv('PYTHONPATH').split(':'):
+
+path = os.getenv('PYTHONPATH')
+paths = path.split(':')
+for p in paths:
   print(p)
-print('len(PYTHONPATH)=', len(os.getenv('PYTHONPATH')))
+print('PYTHONPATH lines:', len(paths))
+print('PYTHONPATH characters:', len(path))
 
 from pathlib import Path
 import boto3
@@ -21,13 +25,16 @@ def openai_api_key() -> str:
 if __name__ == '__main__':
   if os.getenv('MODE') == 'DEV':
     os.chdir('.')
-    print("####### ROOT_DIR . =", os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
   else:
     os.chdir('/static')
-    print("####### ROOT_DIR /static =", os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
+  print("ROOT_DIR =", os.getcwd())
+
+  os.environ['AWS_DEFAULT_REGION'] = 'us-east-2'
+  os.environ['OPENAI_API_KEY'] = openai_api_key()
+
+  print("OAK =", os.getenv('OPENAI_API_KEY'))
 
   try:
-    os.environ['OPENAI_API_KEY'] = openai_api_key()
     args = shlex.split('letta server')
     res = subproc.run(args, text=True)
   except Exception as e:

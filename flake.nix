@@ -33,6 +33,7 @@
                            python-pkgs.numpy
                            python-pkgs.openai
                            python-pkgs.passlib
+                           python-pkgs.prettytable
                            python-pkgs.pydantic-core
                            python-pkgs.python-multipart
                            python-pkgs.pyjwt

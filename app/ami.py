@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from pathlib import Path
+import boto3
 import os
 import shlex
 import subprocess as subproc
@@ -13,8 +14,16 @@ print('SSL_KEY=', SSL_KEY)
 print('SSL_CERT=', SSL_CERT)
 print('PYTHONPATH', os.getenv('PYTHONPATH'))
 
+# @todo: remove code dupe without being dependent on model.__init__.py
+def openai_api_key() -> str:
+  c = boto3.client('secretsmanager')
+  s = c.get_secret_value(SecretId='openai-api-key')['SecretString']
+  c.close()
+  return s
+
 if __name__ == '__main__':
   os.environ['AWS_DEFAULT_REGION'] = 'us-east-2'
+  os.environ['OPENAI_API_KEY'] = openai_api_key()
   ip, port, key, cert = "0.0.0.0", 8000, SSL_KEY, SSL_CERT
   try:
    uvicorn = None

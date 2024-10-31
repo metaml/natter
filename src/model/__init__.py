@@ -46,7 +46,7 @@ async def lifespan(app: fastapi.FastAPI):
   if not letta.agent_exists(agent_name = 'Courtney'):
     agent_state = letta.create_agent(
       name = 'Courtney',
-      memory = ChatMemory( human   = "My name is Courtney",
+      memory = ChatMemory( human   = "My name is Chad and I am your friend.",
                            persona = "I'm a sympathetic friend and confidante to Chad."
                          )
     )
