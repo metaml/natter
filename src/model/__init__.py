@@ -65,6 +65,7 @@ def app():
   if not os.getenv("MODE"): # prod
     logging.basicConfig(level=logging.INFO)
   else:
+    openapi_url = None
     logging.basicConfig(level=logging.DEBUG)
 
   static_dir = os.getenv('STATIC_DIR') or 'static'

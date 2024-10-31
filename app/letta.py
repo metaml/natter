@@ -19,6 +19,13 @@ def openai_api_key() -> str:
   return s
 
 if __name__ == '__main__':
+  if os.getenv('MODE') == 'DEV':
+    os.chdir('.')
+    print("####### ROOT_DIR . =", os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
+  else:
+    os.chdir('/static')
+    print("####### ROOT_DIR /static =", os.path.abspath(os.path.join(os.path.dirname(__file__), ".")))
+
   try:
     os.environ['OPENAI_API_KEY'] = openai_api_key()
     args = shlex.split('letta server')
