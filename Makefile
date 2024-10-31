@@ -7,8 +7,8 @@ run: export AWS_DEFAULT_REGION = us-east-2
 run: ## run ami, rest server
 	./app/ami.py
 
-run-dev: export MODE = DEV
-run-dev: ## run aip, rest server in dev mode
+dev-run: export MODE = DEV
+dev-run: ## run aip, rest server in dev mode
 	./app/ami.py
 
 # nix build --debug --verbose -L .#dist-files
@@ -39,6 +39,9 @@ create-venv: ## create initial venv environment
 
 install-letta: ## install letta
 	venv-pack -o letta.zip
+
+letta-run: ## start letta server
+	letta server --debug
 
 remove: ## @ remove ami flake @
 	nix profile remove #ami
@@ -147,9 +150,6 @@ psql-rds: ## connect to rds instance--"make db-creds" at least once
 
 psql: ## connect to rds instance--"make db-creds" at least once
 	source ./.creds && psql
-
-letta-start: ## start letta server
-	letta server --debug
 
 db-start: ## start dev database
 	pg_ctl --pgdata=.ami-dev-db --log=/tmp/ami-dev-db.log start
