@@ -108,11 +108,6 @@ sns-test: ## test sns
 	--topic-arn "arn:aws:sns:us-east-2:975050288432:aip" \
 	--message file://etc/sns-test.json
 
-# sns-publish: ## publish a message to the aip sns-topic
-# 	aws sns publish \
-# 	--topic-arn "arn:aws:sns:us-east-2:975050288432:aip" \
-# 	--message file://etc/msg.json
-
 rsync: HOST = ec2-3-136-167-53.us-east-2.compute.amazonaws.com
 rsync: ## rsync ami to ec2 instance
 	rsync \
