@@ -4,7 +4,7 @@
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 22 80 443 8000 ];
+    allowedTCPPorts = [ 22 80 443 8000 8283 ];
     allowedUDPPortRanges = [
       { from = 4000; to = 4007; }
       { from = 8000; to = 8010; }
