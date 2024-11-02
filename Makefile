@@ -10,6 +10,9 @@ dev-run: export MODE = DEV
 dev-run: ## run aip, rest server in dev mode
 	./app/ami.py
 
+letta-run: ## start letta server
+	letta server --debug
+
 # nix build --debug --verbose -L .#dist-files
 build: ## build python package
 	nix build # --impure --debug
@@ -37,12 +40,6 @@ install-venv: create-venv ## create venv environment
 
 create-venv: ## create initial venv environment
 	virtualenv venv
-
-install-letta: ## install letta
-	venv-pack -o letta.zip
-
-letta-run: ## start letta server
-	letta server --debug
 
 remove: ## @ remove ami flake @
 	nix profile remove #ami

@@ -1,14 +1,6 @@
 #!/usr/bin/env python
 
 import os
-
-path = os.getenv('PYTHONPATH')
-paths = path.split(':')
-for p in paths:
-  print(p)
-print('PYTHONPATH lines:', len(paths))
-print('PYTHONPATH characters:', len(path))
-
 from pathlib import Path
 import boto3
 import shlex
@@ -23,11 +15,20 @@ def openai_api_key() -> str:
   return s
 
 if __name__ == '__main__':
-  if os.getenv('MODE') == 'DEV':
-    os.chdir('.')
+  path = os.getenv('PYTHONPATH')
+  paths = path.split(':')
+  for p in paths:
+    print(p)
+  print('PYTHONPATH lines:', len(paths))
+  print('PYTHONPATH characters:', len(path))
+  print('env $ROOT_DIR=', os.getenv('ROOT_DIR'))
+
+  root_dir = os.getenv('ROOT_DIR')
+  if root_dir:
+    os.chdir(root_dir)
   else:
     os.chdir('/static')
-  print("ROOT_DIR =", os.getcwd())
+  print("ROOT_DIR=", os.getcwd())
 
   os.environ['AWS_DEFAULT_REGION'] = 'us-east-2'
   os.environ['OPENAI_API_KEY'] = openai_api_key()
@@ -35,7 +36,7 @@ if __name__ == '__main__':
   print("OAK =", os.getenv('OPENAI_API_KEY'))
 
   try:
-    args = shlex.split('letta server')
+    args = shlex.split('letta server --host 0.0.0.0')
     res = subproc.run(args, text=True)
   except Exception as e:
     print("exception: ", e, file=sys.stderr)
